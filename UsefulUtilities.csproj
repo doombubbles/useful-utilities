@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <RootNamespace>UsefulUtilities</RootNamespace>
+        <Configurations>Debug;Release;ReleaseLite</Configurations>
+        <Nullable>enable</Nullable>
+        <AssemblyName>UsefulUtilities</AssemblyName>
+        <LangVersion>latest</LangVersion>
+        <Optimize>false</Optimize>
+        <DebugType>embedded</DebugType>
+    </PropertyGroup>
+    
+    <PropertyGroup Condition="'$(Configuration)' == 'ReleaseLite'">
+        <TargetName>UsefulUtilities.Lite</TargetName>
+        <ProjectName>UsefulUtilities.Lite</ProjectName>
+    </PropertyGroup>
+
+    <Import Project="..\btd6.targets" />
+    
+    <ItemGroup Condition="'$(Configuration)' == 'ReleaseLite'">
+        <Compile Remove="Utilities/AutoNudge.cs" />
+        <Compile Remove="Utilities/BetterAutoStart.cs" />
+        <Compile Remove="Utilities/CopyPasteTowers.cs" />
+        <Compile Remove="Utilities/IndiscriminatePets.cs" />
+        <Compile Remove="Utilities/InGameHeroSwitch.cs" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Content Include=".github\workflows\build.yml" />
+    </ItemGroup>
+    
+</Project>
