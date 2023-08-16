@@ -21,12 +21,20 @@
         <Compile Remove="Utilities/AutoNudge.cs" />
         <Compile Remove="Utilities/BetterAutoStart.cs" />
         <Compile Remove="Utilities/CopyPasteTowers.cs" />
+        <Compile Remove="Utilities/DartlingGunnerTargeting.cs" />
         <Compile Remove="Utilities/IndiscriminatePets.cs" />
         <Compile Remove="Utilities/InGameHeroSwitch.cs" />
+        <Compile Remove="Utilities/MortarMonkeyTargeting.cs" />
+        <Compile Remove="Utilities/SacrificeHelper.cs" />
     </ItemGroup>
     
     <ItemGroup>
       <Content Include=".github\workflows\build.yml" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <EmbeddedResource Include="Resources\wiki_links.json" />
+      <EmbeddedResource Include="clean-wiki-page.js" />
     </ItemGroup>
     
 </Project>

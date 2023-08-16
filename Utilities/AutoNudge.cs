@@ -51,7 +51,7 @@ public class AutoNudge : UsefulUtility
 
         var inputManager = InGame.instance.InputManager;
 
-        if (!inputManager.IsInPlacementMode()) return;
+        if (!inputManager.IsInPlacementMode) return;
 
         if (NudgeToClosest.JustPressed())
         {

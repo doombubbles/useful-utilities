@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BTD_Mod_Helper.Api.Enums;
+using HarmonyLib;
 using Il2CppAssets.Scripts.Unity.UI_New.Coop;
 
 namespace UsefulUtilities.Utilities;
@@ -8,6 +9,8 @@ public class SinglePlayerCoop : ToggleableUtility
     protected override bool DefaultEnabled => true;
 
     public override string Description => "Allows you to start Co-Op lobbies even if you're the only person there.";
+
+    protected override string Icon => VanillaSprites.CoopPlayer1Icon;
 
     [HarmonyPatch(typeof(CoopLobbyScreen), nameof(CoopLobbyScreen.Update))]
     internal static class CoopLobbyScreen_Update

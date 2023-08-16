@@ -4,6 +4,7 @@ using BTD_Mod_Helper.Api.ModOptions;
 using Il2CppAssets.Scripts.Unity.Bridge;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
+using Il2CppSystem.IO;
 using UnityEngine;
 
 namespace UsefulUtilities.Utilities;
@@ -25,13 +26,13 @@ public class TowerSelecting : UsefulUtility
     private static Vector2 lastMousePos;
     protected override bool CreateCategory => true;
 
-    protected override string Icon => VanillaSprites.SelectedTowerMarker;
+    protected override string Icon => VanillaSprites.TargetWhite;
 
     public override void OnUpdate()
     {
         if (InGame.instance == null ||
             TowerSelectionMenu.instance == null ||
-            InGame.instance.InputManager.IsInPlacementMode()) return;
+            InGame.instance.InputManager.IsInPlacementMode) return;
 
         if (SelectNextTower.JustPressed())
         {
@@ -54,10 +55,10 @@ public class TowerSelecting : UsefulUtility
         {
             lastMousePos = InGame.instance.InputManager.cursorPositionWorld;
         }
-
-
+        
         var towers = bridge.GetAllTowers()
             .ToArray()
+            .Where(tts => tts.IsSelectable)
             .OrderBy(tts => Vector2.Distance(lastMousePos, tts.GetSimPosition()))
             .ToList();
 

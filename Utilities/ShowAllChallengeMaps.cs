@@ -4,7 +4,7 @@ using Il2CppAssets.Scripts.Unity.UI_New.ChallengeEditor;
 
 namespace UsefulUtilities.Utilities;
 
-public class ShowAllMaps : ToggleableUtility
+public class ShowAllChallengeMaps : ToggleableUtility
 {
     protected override bool DefaultEnabled => true;
 
@@ -17,7 +17,7 @@ public class ShowAllMaps : ToggleableUtility
         [HarmonyPrefix]
         private static void Prefix(ref bool[] __state)
         {
-            if (!GetInstance<ShowAllMaps>().Enabled) return;
+            if (!GetInstance<ShowAllChallengeMaps>().Enabled) return;
 
             var maps = GameData.Instance.mapSet.maps;
             __state = new bool[maps.Length];
@@ -32,7 +32,7 @@ public class ShowAllMaps : ToggleableUtility
         [HarmonyPostfix]
         private static void Postfix(ref bool[] __state)
         {
-            if (!GetInstance<ShowAllMaps>().Enabled) return;
+            if (!GetInstance<ShowAllChallengeMaps>().Enabled) return;
 
             var maps = GameData.Instance.mapSet.maps;
 

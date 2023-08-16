@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using BTD_Mod_Helper;
 using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Data;
 using BTD_Mod_Helper.Api.ModOptions;
+using Il2CppAssets.Scripts.Models;
 
 namespace UsefulUtilities;
 
@@ -19,7 +21,10 @@ public abstract class UsefulUtility : NamedModContent, IModSettings
     {
         if (ModHelper.HasMod(DisableIfModPresent)) yield break;
 
-        mod.ApplyHarmonyPatches(GetType());
+        foreach (var nestedType in GetType().GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic))
+        {
+            mod.ApplyHarmonyPatches(nestedType);
+        }
 
         OnLoad();
         yield return this;
@@ -62,6 +67,10 @@ public abstract class UsefulUtility : NamedModContent, IModSettings
     }
 
     public virtual void OnRestart()
+    {
+    }
+
+    public virtual void OnNewGameModel(GameModel gameModel)
     {
     }
 }

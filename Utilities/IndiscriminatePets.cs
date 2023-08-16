@@ -11,6 +11,7 @@ namespace UsefulUtilities.Utilities;
 public class IndiscriminatePets : ToggleableUtility
 {
     private static readonly Dictionary<string, string> PetSkinIds = new();
+    
     protected override bool DefaultEnabled => true;
 
     protected override ModSettingCategory Category => UsefulUtilitiesMod.TrophyStore;
@@ -30,7 +31,7 @@ public class IndiscriminatePets : ToggleableUtility
         {
             PetSkinIds.TryAdd(pet.id, pet.skinId);
 
-            pet.skinId = Enabled ? PetSkinIds[pet.id] : "";
+            pet.skinId = Enabled ? "" : PetSkinIds[pet.id];
         }
     }
 }
