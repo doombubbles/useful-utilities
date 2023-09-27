@@ -1,1 +1,2 @@
-- Initial Release
+- Fixed Dartling targeting not being applied to all crosspaths
+- Fixed some mod settings icons

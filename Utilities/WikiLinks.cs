@@ -1,29 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using BTD_Mod_Helper;
 using BTD_Mod_Helper.Api.Enums;
 using BTD_Mod_Helper.Api.Helpers;
-using BTD_Mod_Helper.Api.ModMenu;
 using BTD_Mod_Helper.Api.ModOptions;
 using BTD_Mod_Helper.Extensions;
 using HarmonyLib;
-using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.UI_New.HeroInGame;
 using Il2CppAssets.Scripts.Unity.UI_New.Main.HeroSelect;
 using Il2CppAssets.Scripts.Unity.UI_New.Main.PowersSelect;
 using Il2CppAssets.Scripts.Unity.UI_New.Upgrade;
-using Il2CppNinjaKiwi.Common;
 using Il2CppNinjaKiwi.Players.LiNKAccountControllers;
 using Il2CppTMPro;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine.UI;
 using TaskScheduler = BTD_Mod_Helper.Api.TaskScheduler;
+
+#if DEBUG
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using BTD_Mod_Helper.Api.ModMenu;
+using Il2CppAssets.Scripts.Unity;
+using Il2CppNinjaKiwi.Common;
+using Newtonsoft.Json;
+#endif
 
 namespace UsefulUtilities.Utilities;
 

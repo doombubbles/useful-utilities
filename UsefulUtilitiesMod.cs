@@ -20,7 +20,7 @@ public class UsefulUtilitiesMod : BloonsTD6Mod
 
     public static readonly ModSettingCategory Targeting = new("Targeting")
     {
-        icon = VanillaSprites.TrophyStoreBtn,
+        icon = VanillaSprites.CamoTargetIconCross,
         order = 2
     };
 

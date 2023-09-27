@@ -12,7 +12,7 @@ public class CursorSizeHotkey : UsefulUtility
 {
     protected override bool CreateCategory => true;
 
-    protected override string Icon => VanillaSprites.TutorialHandUp;
+    protected override string Icon => VanillaSprites.Hand;
 
     private static readonly ModSettingHotkey CycleCursorSize = new();
     private static readonly ModSettingHotkey CursorSizeNormal = new();

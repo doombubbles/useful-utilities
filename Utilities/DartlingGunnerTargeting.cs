@@ -1,4 +1,5 @@
-﻿using BTD_Mod_Helper.Api.Enums;
+﻿using System.Linq;
+using BTD_Mod_Helper.Api.Enums;
 using BTD_Mod_Helper.Api.ModOptions;
 using BTD_Mod_Helper.Extensions;
 using Il2CppAssets.Scripts.Models;
@@ -24,10 +25,10 @@ public class DartlingGunnerTargeting : ToggleableUtility
     {
         if (!Enabled) return;
 
-        foreach (var model in gameModel.GetTowersWithBaseId(TowerType.DartlingGunner))
+        foreach (var model in gameModel.towers.Where(model =>
+                     model.baseId == TowerType.DartlingGunner &&
+                     !model.appliedUpgrades.Contains(UpgradeType.BloonAreaDenialSystem)))
         {
-            if (model.appliedUpgrades.Contains(UpgradeType.BloonAreaDenialSystem)) return;
-
             var attackModel = model.GetAttackModel();
 
             attackModel.AddBehavior(new RotateToTargetModel("", false, false, false, 0,

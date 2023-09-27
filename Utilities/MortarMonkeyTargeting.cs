@@ -1,10 +1,10 @@
-﻿using BTD_Mod_Helper.Api.Enums;
+﻿using System.Linq;
+using BTD_Mod_Helper.Api.Enums;
 using BTD_Mod_Helper.Api.ModOptions;
 using BTD_Mod_Helper.Extensions;
 using Il2CppAssets.Scripts.Models;
 using Il2CppAssets.Scripts.Models.Towers;
 using Il2CppAssets.Scripts.Models.Towers.Behaviors.Attack.Behaviors;
-using Il2CppAssets.Scripts.Models.Towers.Weapons.Behaviors;
 
 namespace UsefulUtilities.Utilities;
 
@@ -24,10 +24,9 @@ public class MortarMonkeyTargeting : ToggleableUtility
     {
         if (!Enabled) return;
 
-        foreach (var model in gameModel.GetTowersWithBaseId(TowerType.MortarMonkey))
+        foreach (var model in gameModel.towers.Where(model => model.baseId == TowerType.MortarMonkey))
         {
             var attackModel = model.GetAttackModel();
-
 
             var targetSelectedPointModel = attackModel.GetBehavior<TargetSelectedPointModel>();
             attackModel.RemoveBehavior<TargetSelectedPointModel>();
