@@ -1,13 +1,8 @@
-<a href="https://github.com/doombubbles/useful-utilities/releases/latest/download/UsefulUtilities.dll">
-    <img align="left" alt="Icon" height="90" src="Icon.png">
-    <img align="right" alt="Download" height="75" src="https://raw.githubusercontent.com/gurrenm3/BTD-Mod-Helper/master/BloonsTD6%20Mod%20Helper/Resources/DownloadBtn.png">
-</a>
-
 <h1 align="center">Useful Utilities</h1>
 
 ## Adds in an assortment of quality of life features to BTD6
 
-Combines many new features with an assortment of my other standalone QoL mods bundled together to become the one-stop
+Combines many new features with an assortment of my other standalone QoL mods bundled together to become a one-stop
 shop for BTD6 utilities.
 
 ### Brand New Features
