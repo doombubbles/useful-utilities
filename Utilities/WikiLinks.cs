@@ -61,6 +61,11 @@ public class WikiLinks : ToggleableUtility
     {
         base.OnLoad();
 
+        if (ModHelper.IsEpic)
+        {
+            mod.ModSettings.Remove(nameof(EmbeddedBrowser));
+        }
+
         await using var jsonStream = mod.MelonAssembly.Assembly.GetEmbeddedResource(WikiLinksJSON);
         using var jsonReader = new StreamReader(jsonStream);
         var jsonText = await jsonReader.ReadToEndAsync();
@@ -110,29 +115,35 @@ public class WikiLinks : ToggleableUtility
     {
         var fullLink = Path.Combine(WikiUrl, link);
 
-        if (EmbeddedBrowser)
+        if (EmbeddedBrowser && !ModHelper.IsEpic)
         {
-            var embeddedBrowser = ModHelper.GetMod("BloonsTD6 Mod Helper").MelonAssembly.Assembly
-                .GetType("BTD_Mod_Helper.UI.BTD6.EmbeddedBrowser")!;
-            var open = embeddedBrowser.GetMethod("OpenURL", BindingFlags.NonPublic | BindingFlags.Static)!;
-
-            open.Invoke(null, new object?[]
-            {
-                fullLink, new Action<SteamWebView>(view =>
-                {
-                    view.EvaluateJavaScript(cleanWikiPageScript);
-                    if (firstTime)
-                    {
-                        firstTime = false;
-                        TaskScheduler.ScheduleTask(() => view.Exists()?.Reload(), ScheduleType.WaitForSeconds, 1);
-                    }
-                })
-            });
+            OpenEmbeddedLink(fullLink);
         }
         else
         {
             ProcessHelper.OpenURL(fullLink);
         }
+    }
+
+    private static void OpenEmbeddedLink(string fullLink)
+    {
+        var embeddedBrowser = ModHelper.GetMod("BloonsTD6 Mod Helper").MelonAssembly.Assembly
+            .GetType("BTD_Mod_Helper.UI.BTD6.EmbeddedBrowser")!;
+        var open = embeddedBrowser.GetMethod("OpenURL", BindingFlags.NonPublic | BindingFlags.Static)!;
+
+        open.Invoke(null, new object?[]
+        {
+            fullLink, new Action<SteamWebView>(view =>
+            {
+                view.EvaluateJavaScript(cleanWikiPageScript);
+                if (firstTime)
+                {
+                    firstTime = false;
+                    TaskScheduler.ScheduleTask(() => view.Exists()?.Reload(), ScheduleType.WaitForSeconds, 1);
+                }
+            })
+        });
+        
     }
 
     [HarmonyPatch(typeof(UpgradeScreen), nameof(UpgradeScreen.UpdateUi))]
@@ -155,7 +166,7 @@ public class WikiLinks : ToggleableUtility
     }
 
     [HarmonyPatch(typeof(HeroUpgradeDetails), nameof(HeroUpgradeDetails.BindDetails))]
-    internal static class HeroUpgradeDetails_Open
+    internal static class HeroUpgradeDetails_BindDetails
     {
         [HarmonyPostfix]
         private static void Postfix(HeroUpgradeDetails __instance)

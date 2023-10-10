@@ -1,2 +1,2 @@
-- Fixed Dartling targeting not being applied to all crosspaths
-- Fixed some mod settings icons
+- Recompiled for BTD6 39.0
+- Fixed Embedded Browser usage on Epic
