@@ -1,2 +1,4 @@
-- Recompiled for BTD6 39.0
-- Fixed Embedded Browser usage on Epic
+- Updated degree calculations for v39 changes
+- Added Degree Indicator to the paragon investment slider
+- Removed the Sandbox Paragons utility in favor of NK's new way of doing it
+  - The Unlimited 5th Tiers mod will also still automatically provided the old functionality

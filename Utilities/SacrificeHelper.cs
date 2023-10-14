@@ -7,6 +7,7 @@ using BTD_Mod_Helper.Api.Enums;
 using BTD_Mod_Helper.Api.ModOptions;
 using BTD_Mod_Helper.Extensions;
 using HarmonyLib;
+using Il2Cpp;
 using Il2CppAssets.Scripts.Data.ParagonData;
 using Il2CppAssets.Scripts.Models.Towers.Behaviors;
 using Il2CppAssets.Scripts.Simulation.Towers;
@@ -16,6 +17,7 @@ using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu.TowerSelectionMenuThemes;
 using Il2CppAssets.Scripts.Unity.UI_New.Popups;
+using Il2CppAssets.Scripts.Unity.UI_New.Utils;
 using Il2CppTMPro;
 using MelonLoader;
 using UnityEngine;
@@ -282,8 +284,11 @@ public class SacrificeHelper : UsefulUtility
         private float current;
         private float max;
 
-        public ParagonDetail(string name, string icon, Func<ParagonTower.InvestmentInfo, float> current,
-            Func<ParagonDegreeDataModel, float>? max = null, Action<ModHelperComponent>? modifyIcon = null)
+        public ParagonDetail
+        (
+            string name, string icon, Func<ParagonTower.InvestmentInfo, float> current,
+            Func<ParagonDegreeDataModel, float>? max = null, Action<ModHelperComponent>? modifyIcon = null
+        )
         {
             Name = name;
             Icon = icon;
@@ -405,7 +410,7 @@ public class SacrificeHelper : UsefulUtility
             activeAt = -1
         };
 
-        public static int GetParagonDegree(TowerToSimulation tower, out ParagonTower.InvestmentInfo investmentInfo)
+        public static int GetParagonDegree(TowerToSimulation tower, out ParagonTower.InvestmentInfo investmentInfo, float bonus = 0)
         {
             var degreeDataModel = InGame.instance.GetGameModel().paragonDegreeDataModel;
             var degree = 0;
@@ -414,18 +419,23 @@ public class SacrificeHelper : UsefulUtility
 
             var paragonCost = tower.GetUpgradeCost(0, 6, -1, true);
 
-            // TODO seems like a bug with BTD6, should the paragon upgrade cost really be included ???
-            tower.tower.worth += paragonCost;
-
             var paragonTower = FakeParagonTower(tower.tower);
+
+            paragonTower.upgradeCost = paragonCost;
+
+            var bonusInvestment = new ParagonTower.InvestmentInfo
+            {
+                powerFromMoneySpent = (bonus * degreeDataModel.moneySpentOverX) /
+                                      ((1 + degreeDataModel.paidContributionPenalty) * paragonCost)
+            };
+
             investmentInfo = InGame.instance.GetAllTowerToSim()
                 .Where(tts =>
                     tts.Def.baseId == tower.Def.baseId || tts.Def.GetChild<ParagonSacrificeBonusModel>() != null)
-                .OrderBy(tts => paragonTower.GetTowerInvestment(tts.tower, 3).totalInvestment)
+                .OrderBy(tts => paragonTower.GetTowerInvestment(tts.tower).totalInvestment)
                 .Select(tts => paragonTower.GetTowerInvestment(tts.tower, tts.Def.tier >= 5 ? index++ : 3))
-                .Aggregate(paragonTower.CombineInvestments);
+                .Aggregate(bonusInvestment, paragonTower.CombineInvestments);
 
-            tower.tower.worth -= paragonCost;
 
             var requirements = degreeDataModel.powerDegreeRequirements;
 
@@ -439,6 +449,42 @@ public class SacrificeHelper : UsefulUtility
             }
 
             return degree;
+        }
+    }
+
+    [HarmonyPatch(typeof(ParagonConfirmationPopup), nameof(ParagonConfirmationPopup.UpdateCurrentInvestment))]
+    internal static class ParagonConfirmationPopup_UpdateCurrentInvestment
+    {
+        [HarmonyPostfix]
+        private static void Postfix(ParagonConfirmationPopup __instance, float current)
+        {
+            var tower = TowerSelectionMenu.instance.selectedTower;
+
+            var degree = Utils.GetParagonDegree(tower, out _, current);
+
+            var text = __instance.transform.GetComponentFromChildrenByName<NK_TextMeshProUGUI>("DegreeText");
+            text.SetText(degree.ToString());
+            text.color = degree >= 100 ? Color.green : Color.white;
+        }
+    }
+
+    [HarmonyPatch(typeof(ParagonConfirmationPopup), nameof(ParagonConfirmationPopup.Init),
+        typeof(Il2CppSystem.Action<double>), typeof(Il2CppSystem.Action), typeof(int), typeof(int), typeof(int),
+        typeof(PopupScreen.BackGround), typeof(Popup.TransitionAnim))]
+    internal static class ParagonConfirmationPopup_Init
+    {
+        [HarmonyPostfix]
+        private static void Postfix(ParagonConfirmationPopup __instance)
+        {
+            var tower = TowerSelectionMenu.instance.selectedTower;
+            var degree = Utils.GetParagonDegree(tower, out _);
+
+            var mainObject = __instance.animator.gameObject;
+
+            var indicator =
+                ModHelperImage.Create(new Info("DegreeIndicator", 0, -450, 250, 250), UpgradeContainerParagon);
+            mainObject.AddModHelperComponent(indicator);
+            indicator.AddText(new Info("DegreeText", InfoPreset.FillParent), degree.ToString(), 100f);
         }
     }
 }

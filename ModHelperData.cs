@@ -3,7 +3,7 @@ namespace UsefulUtilities;
 public static class ModHelperData
 {
     public const string WorksOnVersion = "39.0";
-    public const string Version = "1.0.2";
+    public const string Version = "1.0.3";
     public const string Name = "Useful Utilities";
 
     public const string Description = "Adds an assortment of minor utilities to BTD6\n" +

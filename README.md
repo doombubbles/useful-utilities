@@ -42,7 +42,7 @@ shop for BTD6 utilities.
 
 - Temple and Paragon Sacrifice UI from Sacrifice Helper
     - Use the full mod for sacrifice effect customization
-- Paragons / VTSG being usable in Sandbox from Unlimited 5th Tiers +
+- VTSG being usable in Sandbox from Unlimited 5th Tiers +
     - Use the full mod for multiple 5th tiers, VTSGs, etc
 - Dartling + Mortar First/Last/Close/Strong targeting from Mega Knowledge
   - Use the full mod for the rest of the Mega Knowledge effects
