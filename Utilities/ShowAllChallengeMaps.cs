@@ -19,7 +19,7 @@ public class ShowAllChallengeMaps : ToggleableUtility
         {
             if (!GetInstance<ShowAllChallengeMaps>().Enabled) return;
 
-            var maps = GameData.Instance.mapSet.maps;
+            var maps = GameData.Instance.mapSet.Maps.items;
             __state = new bool[maps.Length];
 
             for (var i = 0; i < maps.Length; i++)
@@ -34,7 +34,7 @@ public class ShowAllChallengeMaps : ToggleableUtility
         {
             if (!GetInstance<ShowAllChallengeMaps>().Enabled) return;
 
-            var maps = GameData.Instance.mapSet.maps;
+            var maps = GameData.Instance.mapSet.Maps.items;
 
             for (var i = 0; i < maps.Length; i++)
             {
