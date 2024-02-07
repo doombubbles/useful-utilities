@@ -38,7 +38,7 @@ public class HotkeyDisplay : ToggleableUtility
 
     protected override string Icon => VanillaSprites.HotkeysIcon;
 
-    private static void UpdateHotkeyDisplay(ItemPurchaseButton button, HotkeyButton hotkeyButton)
+    private static void UpdateHotkeyDisplay(TowerPurchaseButton2D button, HotkeyButton hotkeyButton)
     {
         if (button == null) return;
 
@@ -94,11 +94,12 @@ public class HotkeyDisplay : ToggleableUtility
         {
             if (!GetInstance<HotkeyDisplay>().Enabled) return;
 
-            UpdateHotkeyDisplay(__instance.HeroButton, __instance.heroHotkey);
+            UpdateHotkeyDisplay(__instance.HeroButton.Cast<TowerPurchaseButton2D>(), __instance.heroHotkey);
 
             foreach (var towerHotkey in __instance.towerHotkeys)
             {
-                UpdateHotkeyDisplay(towerHotkey.towerPurchaseButton, towerHotkey.hotkeyButton);
+                UpdateHotkeyDisplay(towerHotkey.towerPurchaseButton.Cast<TowerPurchaseButton2D>(),
+                    towerHotkey.hotkeyButton);
             }
         }
     }

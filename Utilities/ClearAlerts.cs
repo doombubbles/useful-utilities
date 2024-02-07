@@ -136,12 +136,15 @@ public class ClearAlerts : ToggleableUtility
                     }
                 }
 
-                foreach (var questSaveData in profile.questsSaveData)
+                if (QuestTrackerManager.instance.TryGetTowerTrialQuest(heroButton.HeroId, out var quest))
                 {
-                    if (!questSaveData.hasSeenQuest && questSaveData.questId.Contains(heroButton.HeroId + "Test"))
+                    foreach (var questSaveData in profile.questsSaveData)
                     {
-                        questSaveData.hasSeenQuest = true;
-                        changes = true;
+                        if (!questSaveData.hasSeenQuest && questSaveData.questId == quest.id)
+                        {
+                            questSaveData.hasSeenQuest = true;
+                            changes = true;
+                        }
                     }
                 }
 

@@ -63,7 +63,7 @@ public class InGameHeroSwitch : UsefulUtility
 
         var hero = realSelectedHero ?? InGame.instance.SelectedHero;
 
-        var purchaseButton = ShopMenu.instance.GetTowerButtonFromBaseId(hero);
+        var purchaseButton = ShopMenu.instance.GetTowerButtonFromBaseId(hero).GetComponent<TowerPurchaseButton>();
         if (!CycleIfPlaced &&
             purchaseButton != null &&
             purchaseButton.GetLockedState() ==
@@ -102,9 +102,9 @@ public class InGameHeroSwitch : UsefulUtility
 
         realSelectedHero = newHero;
         ShopMenu.instance.RebuildTowerSet();
-        foreach (var button in ShopMenu.instance.activeTowerButtons)
+        foreach (var button in ShopMenu.instance.ActiveTowerButtons)
         {
-            button.Update();
+            button.Cast<TowerPurchaseButton>().Update();
         }
     }
 }
