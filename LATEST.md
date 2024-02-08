@@ -1,1 +1,1 @@
-- Fixes for v40.0
+- Fixed In Game Hero Switch breaking after you start a new game

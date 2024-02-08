@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using BTD_Mod_Helper.Api.ModOptions;
 using BTD_Mod_Helper.Extensions;
+using Il2CppAssets.Scripts.Models;
 using Il2CppAssets.Scripts.Models.TowerSets;
 using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
@@ -47,6 +48,11 @@ public class InGameHeroSwitch : UsefulUtility
         {
             ChangeHero(1);
         }
+    }
+
+    public override void OnNewGameModel(GameModel gameModel)
+    {
+        realSelectedHero = InGame.instance.SelectedHero;
     }
 
     public override void OnRestart()
