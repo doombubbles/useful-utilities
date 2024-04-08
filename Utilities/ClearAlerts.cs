@@ -166,7 +166,7 @@ public class ClearAlerts : ToggleableUtility
             {
                 foreach (var heroDetails in Game.instance.model.heroSet)
                 {
-                    if (profile.seenNewHeroNotification.Add(heroDetails.name))
+                    if (profile.seenNewHeroNotification.Add(heroDetails.towerId))
                     {
                         changes = true;
                     }

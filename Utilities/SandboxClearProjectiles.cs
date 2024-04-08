@@ -35,10 +35,7 @@ public class SandboxClearProjectiles : ToggleableUtility
             matchLocalPosition.transformToCopy = __instance.btnResetDamage.transform;
             matchLocalPosition.offset = new Vector3(0, 213, 0);
 
-            clearProjectiles.OnPointerUpEvent = new Action<PointerEventData>(_ =>
-            {
-                InGame.Bridge.DestroyAllProjectiles();
-            });
+            clearProjectiles.onClick.SetListener(() => InGame.Bridge.DestroyAllProjectiles());
         }
     }
 }
