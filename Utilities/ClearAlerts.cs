@@ -151,7 +151,7 @@ public class ClearAlerts : ToggleableUtility
                 if (changes)
                 {
                     __instance.transform.FindChild("PipNotification").gameObject.SetActive(false);
-                    if (heroButton.screen.selectedHeroId == heroButton.HeroId)
+                    if (heroButton.screen.SelectedHeroId == heroButton.HeroId)
                     {
                         heroButton.screen.questPip.SetActive(false);
                         foreach (var heroSkinButton in heroButton.screen.GetComponentsInChildren<HeroSkinButton>())

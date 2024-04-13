@@ -171,7 +171,7 @@ public class WikiLinks : ToggleableUtility
         [HarmonyPostfix]
         private static void Postfix(HeroUpgradeDetails __instance)
         {
-            Setup(__instance.heroName, () => __instance.selectedHeroId);
+            Setup(__instance.heroName, () => __instance.SelectedHeroId);
         }
     }
 
