@@ -36,7 +36,7 @@ public class CopyPasteTowers : UsefulUtility
         if (TowerSelectionMenu.instance)
         {
             var selectedTower = TowerSelectionMenu.instance.selectedTower;
-            if (selectedTower is { IsParagon: false } && !selectedTower.tower.towerModel.IsHero())
+            if (selectedTower is {IsParagon: false} && !selectedTower.tower.towerModel.IsHero())
             {
                 lastCopyWasCut = CutTower.JustPressed();
                 if (CutTower.JustPressed() || CopyTower.JustPressed())
@@ -98,7 +98,7 @@ public class CopyPasteTowers : UsefulUtility
             {
                 ModHelper.Error<UsefulUtilitiesMod>(e);
             }
-        }), new ObjectId { data = (uint) InGame.instance.UnityToSimulation.GetInputId() });
+        }), new ObjectId {data = (uint) InGame.instance.bridge.GetInputId()});
     }
 
     private static double CalculateCost(TowerModel towerModel, Vector3 pos = default)
@@ -111,7 +111,8 @@ public class CopyPasteTowers : UsefulUtility
         var discountMult = 0f;
         if (pos != default)
         {
-            var zoneDiscount = towerManager.GetZoneDiscount(pos, 0, 0);
+            var zoneDiscount =
+                towerManager.GetZoneDiscount(towerModel, pos, 0, 0, InGame.instance.bridge.MyPlayerNumber);
             discountMult = towerManager.GetDiscountMultiplier(zoneDiscount);
         }
 
@@ -124,7 +125,8 @@ public class CopyPasteTowers : UsefulUtility
             discountMult = 0f;
             if (pos != default)
             {
-                var zoneDiscount = towerManager.GetZoneDiscount(pos, upgrade.path, upgrade.tier);
+                var zoneDiscount = towerManager.GetZoneDiscount(towerModel, pos, upgrade.path, upgrade.tier,
+                    InGame.instance.bridge.MyPlayerNumber);
                 discountMult = towerManager.GetDiscountMultiplier(zoneDiscount);
             }
 

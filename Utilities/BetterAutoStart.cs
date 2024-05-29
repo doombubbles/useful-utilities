@@ -49,7 +49,7 @@ public class BetterAutoStart : ToggleableUtility
                 __instance.name == "FastFoward-Go" &&
                 GetInstance<BetterAutoStart>().Enabled) // yes this is a real typo in the name
             {
-                var newValue = !InGame.instance.UnityToSimulation.simulation.autoPlay;
+                var newValue = !InGame.instance.bridge.simulation.autoPlay;
                 Game.instance.GetPlayerProfile().inGameSettings.autoPlay = newValue;
                 InGame.instance.bridge.SetAutoPlay(newValue);
             }

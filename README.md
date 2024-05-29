@@ -1,4 +1,3 @@
-
 <h1 align="center">
 <a href="https://github.com/doombubbles/useful-utilities/releases/latest/download/UsefulUtilities.dll">
     <img align="left" alt="Icon" height="90" src="Icon.png">
