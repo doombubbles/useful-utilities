@@ -1,16 +1,12 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using BTD_Mod_Helper;
 using BTD_Mod_Helper.Api.Enums;
 using BTD_Mod_Helper.Extensions;
-using BTD_Mod_Helper.UI.BTD6;
 using HarmonyLib;
 using Il2CppAssets.Scripts.Data;
 using Il2CppAssets.Scripts.Data.Quests;
 using Il2CppAssets.Scripts.Models.ServerEvents;
 using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.Menu;
-using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.Main.HeroSelect;
 using Il2CppAssets.Scripts.Unity.UI_New.Main.Home;
 using Il2CppAssets.Scripts.Unity.UI_New.Main.PowersSelect;
@@ -35,7 +31,7 @@ public class ClearAlerts : ToggleableUtility
         [HarmonyPostfix]
         internal static void Postfix(Button __instance, PointerEventData eventData)
         {
-            if (eventData.button != PointerEventData.InputButton.Right) return;
+            if (eventData.button != PointerEventData.InputButton.Right || Game.Player == null) return;
 
             var profile = Game.Player.Data;
             var changes = false;

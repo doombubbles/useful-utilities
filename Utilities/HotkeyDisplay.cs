@@ -94,12 +94,17 @@ public class HotkeyDisplay : ToggleableUtility
         {
             if (!GetInstance<HotkeyDisplay>().Enabled) return;
 
-            UpdateHotkeyDisplay(__instance.HeroButton.Cast<TowerPurchaseButton2D>(), __instance.heroHotkey);
+            if (__instance.HeroButton.Is(out TowerPurchaseButton2D towerPurchaseButton2D))
+            {
+                UpdateHotkeyDisplay(towerPurchaseButton2D, __instance.heroHotkey);
+            }
 
             foreach (var towerHotkey in __instance.towerHotkeys)
             {
-                UpdateHotkeyDisplay(towerHotkey.towerPurchaseButton.Cast<TowerPurchaseButton2D>(),
-                    towerHotkey.hotkeyButton);
+                if (towerHotkey.towerPurchaseButton.Is(out towerPurchaseButton2D))
+                {
+                    UpdateHotkeyDisplay(towerPurchaseButton2D, towerHotkey.hotkeyButton);
+                }
             }
         }
     }
