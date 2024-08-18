@@ -1,13 +1,14 @@
 ﻿using System.Linq;
 using BTD_Mod_Helper.Api.ModOptions;
 using BTD_Mod_Helper.Extensions;
-using Il2CppAssets.Scripts.Models;
 using Il2CppAssets.Scripts.Models.TowerSets;
+using Il2CppAssets.Scripts.Simulation.Input;
 using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.RightMenu;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.StoreMenu;
 using UnityEngine;
+using UnityEngine.InputSystem.Utilities;
 
 namespace UsefulUtilities.Utilities;
 
@@ -16,14 +17,6 @@ public class InGameHeroSwitch : UsefulUtility
     private static readonly ModSettingHotkey CycleUp = new(KeyCode.PageUp);
 
     private static readonly ModSettingHotkey CycleDown = new(KeyCode.PageDown);
-
-    private static readonly ModSettingBool CycleIfPlaced = new(false)
-    {
-        description = "Whether to still allow cycling to different heroes if one is already placed down.",
-        button = true
-    };
-
-    private static string? realSelectedHero;
 
     private static bool cycleDown;
     private static bool cycleUp;
@@ -50,28 +43,35 @@ public class InGameHeroSwitch : UsefulUtility
         }
     }
 
-    public override void OnNewGameModel(GameModel gameModel)
+    /// <summary>
+    /// Gets the current selected hero
+    /// </summary>
+    /// <param name="towerInventory">Current Tower Inventory</param>
+    /// <returns>Selected Hero id, or null if no clear selected hero, or multiple</returns>
+    private static string? SelectedHero(TowerInventory towerInventory)
     {
-        realSelectedHero = InGame.instance.SelectedHero;
+        var heroes = InGame.Bridge.Simulation.model.heroSet.Select(hero => hero.towerId).ToList();
+        return heroes.FirstOrDefault(hero =>
+            towerInventory.towerMaxes.GetValueOrDefault(hero) == 1 &&
+            heroes.Where(h => h != hero).All(h => towerInventory.towerMaxes.GetValueOrDefault(h) == 0)
+        );
     }
 
     public override void OnRestart()
     {
-        if (realSelectedHero != null)
-        {
-            ResetInventory(realSelectedHero);
-        }
+        ShopMenu.instance.RebuildTowerSet();
     }
 
     private static void ChangeHero(int delta)
     {
         cycleDown = cycleUp = false;
 
-        var hero = realSelectedHero ?? InGame.instance.SelectedHero;
+        var hero = SelectedHero(InGame.instance.GetTowerInventory());
+        
+        if (hero == null) return;
 
         var purchaseButton = ShopMenu.instance.GetTowerButtonFromBaseId(hero).GetComponent<TowerPurchaseButton>();
-        if (!CycleIfPlaced &&
-            purchaseButton != null &&
+        if (purchaseButton != null &&
             purchaseButton.GetLockedState() ==
             TowerPurchaseLockState.TowerInventoryLocked)
         {
@@ -106,7 +106,6 @@ public class InGameHeroSwitch : UsefulUtility
 
         towerInventory.towerMaxes[newHero] = 1;
 
-        realSelectedHero = newHero;
         ShopMenu.instance.RebuildTowerSet();
         foreach (var button in ShopMenu.instance.ActiveTowerButtons)
         {

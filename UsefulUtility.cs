@@ -6,6 +6,8 @@ using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Data;
 using BTD_Mod_Helper.Api.ModOptions;
 using Il2CppAssets.Scripts.Models;
+using Il2CppAssets.Scripts.Models.TowerSets;
+using Il2CppAssets.Scripts.Simulation.Input;
 
 namespace UsefulUtilities;
 

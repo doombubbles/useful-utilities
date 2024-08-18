@@ -8,6 +8,7 @@ using Il2CppAssets.Scripts.Models;
 using MelonLoader;
 using Newtonsoft.Json.Linq;
 using UsefulUtilities;
+
 [assembly: MelonInfo(typeof(UsefulUtilitiesMod), ModHelperData.Name, ModHelperData.Version, ModHelperData.RepoOwner)]
 [assembly: MelonGame("Ninja Kiwi", "BloonsTD6")]
 [assembly: HarmonyDontPatchAll]

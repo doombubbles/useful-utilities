@@ -32,19 +32,13 @@ public class ParagonSentryTargeting : ToggleableUtility
         attackModel.AddBehavior(new RotateToTargetModel("", false, false, false, 0,
             false, false));
 
-        var targetPointerModel = attackModel.GetBehavior<TargetPointerModel>();
         var targetSelectedPointModel = dartlingGunner.GetDescendant<TargetSelectedPointModel>().Duplicate();
         targetSelectedPointModel.isOnSubTower = true;
-
-        attackModel.RemoveBehavior<TargetPointerModel>();
 
         attackModel.AddBehavior(new TargetFirstModel("", true, true));
         attackModel.AddBehavior(new TargetLastModel("", true, true));
         attackModel.AddBehavior(new TargetCloseModel("", true, true));
         attackModel.AddBehavior(new TargetStrongModel("", true, true));
-
-        attackModel.AddBehavior(targetPointerModel);
-        attackModel.AddBehavior(targetSelectedPointModel);
 
         attackModel.GetDescendant<LineEffectModel>().useRotateToPointer = false;
 

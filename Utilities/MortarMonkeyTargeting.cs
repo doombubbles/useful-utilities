@@ -27,17 +27,11 @@ public class MortarMonkeyTargeting : ToggleableUtility
         foreach (var model in gameModel.towers.Where(model => model.baseId == TowerType.MortarMonkey))
         {
             var attackModel = model.GetAttackModel();
-
-            var targetSelectedPointModel = attackModel.GetBehavior<TargetSelectedPointModel>();
-            attackModel.RemoveBehavior<TargetSelectedPointModel>();
-            attackModel.targetProvider = null;
-
+            
             attackModel.AddBehavior(new TargetFirstModel("", true, false));
             attackModel.AddBehavior(new TargetLastModel("", true, false));
             attackModel.AddBehavior(new TargetCloseModel("", true, false));
             attackModel.AddBehavior(new TargetStrongModel("", true, false));
-            
-            attackModel.AddBehavior(targetSelectedPointModel);
             
             model.towerSelectionMenuThemeId = "ActionButton";
             model.UpdateTargetProviders();

@@ -1,6 +1,8 @@
-﻿using HarmonyLib;
+﻿using System.Reflection;
+using HarmonyLib;
 using Il2CppAssets.Scripts.Data;
 using Il2CppAssets.Scripts.Unity.UI_New.ChallengeEditor;
+using Il2CppAssets.Scripts.Unity.UI_New.DailyChallenge;
 
 namespace UsefulUtilities.Utilities;
 
@@ -11,9 +13,15 @@ public class ShowAllChallengeMaps : ToggleableUtility
     public override string Description =>
         "Shows hidden maps like Blons in the Challenge Editor without any restrictions.";
 
-    [HarmonyPatch(typeof(ChallengeEditor), nameof(ChallengeEditor.MapSelectClicked))]
+    [HarmonyPatch]
     internal static class ChallengeEditor_MapSelectClicked
     {
+        private static System.Collections.Generic.IEnumerable<MethodBase> TargetMethods()
+        {
+            yield return AccessTools.Method(typeof(ChallengeEditor), nameof(ChallengeEditor.MapSelectClicked));
+            yield return AccessTools.Method(typeof(BossEventScreen), nameof(BossEventScreen.MapSelectClicked));
+        }
+        
         [HarmonyPrefix]
         private static void Prefix(ref bool[] __state)
         {
@@ -25,7 +33,10 @@ public class ShowAllChallengeMaps : ToggleableUtility
             for (var i = 0; i < maps.Length; i++)
             {
                 __state[i] = maps[i].isBrowserOnly;
-                maps[i].isBrowserOnly = false;
+                if (maps[i].id != "BaseEditorMap")
+                {
+                    maps[i].isBrowserOnly = false;
+                }
             }
         }
 
@@ -42,4 +53,6 @@ public class ShowAllChallengeMaps : ToggleableUtility
             }
         }
     }
+    
+    
 }

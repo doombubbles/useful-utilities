@@ -1,1 +1,3 @@
-- Minor fixes for v44
+- Fixed some situations between In Game Hero Switch and restarting a match
+- Added new functionality where you can right click on a Slider in the UI to manually set its value
+- The default targeting option is no longer switched for Dartling Gunners / Mortars

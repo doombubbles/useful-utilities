@@ -34,20 +34,10 @@ public class DartlingGunnerTargeting : ToggleableUtility
             attackModel.AddBehavior(new RotateToTargetModel("", false, false, false, 0,
                 false, false));
 
-
-            var targetPointerModel = attackModel.GetBehavior<TargetPointerModel>();
-            var targetSelectedPointModel = attackModel.GetBehavior<TargetSelectedPointModel>();
-
-            attackModel.RemoveBehavior<TargetPointerModel>();
-            attackModel.RemoveBehavior<TargetSelectedPointModel>();
-
             attackModel.AddBehavior(new TargetFirstModel("", true, false));
             attackModel.AddBehavior(new TargetLastModel("", true, false));
             attackModel.AddBehavior(new TargetCloseModel("", true, false));
             attackModel.AddBehavior(new TargetStrongModel("", true, false));
-
-            attackModel.AddBehavior(targetPointerModel);
-            attackModel.AddBehavior(targetSelectedPointModel);
 
             if (attackModel.HasDescendant(out LineEffectModel lineEffectModel))
             {
