@@ -8,6 +8,7 @@ using BTD_Mod_Helper.Api.ModOptions;
 using Il2CppAssets.Scripts.Models;
 using Il2CppAssets.Scripts.Models.TowerSets;
 using Il2CppAssets.Scripts.Simulation.Input;
+using MelonLoader;
 
 namespace UsefulUtilities;
 
@@ -18,6 +19,8 @@ public abstract class UsefulUtility : NamedModContent, IModSettings
     protected virtual string Icon => TextureExists(Name) ? GetTextureGUID(Name) : null!;
 
     protected virtual string DisableIfModPresent => Name;
+
+    protected static MelonLogger.Instance MelonLogger => GetInstance<UsefulUtilitiesMod>().LoggerInstance;
 
     public sealed override IEnumerable<ModContent> Load()
     {

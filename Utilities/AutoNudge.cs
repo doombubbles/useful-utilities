@@ -1,6 +1,4 @@
-﻿using BTD_Mod_Helper;
-using BTD_Mod_Helper.Api.Enums;
-using BTD_Mod_Helper.Api.ModOptions;
+﻿using BTD_Mod_Helper.Api.ModOptions;
 using Il2Cpp;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppGeom;
@@ -8,10 +6,25 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Random = System.Random;
 
-namespace UsefulUtilities.Utilities;
+#if USEFUL_UTILITIES
+using BTD_Mod_Helper;
+using BTD_Mod_Helper.Api.Enums;
+using MelonLoader;
 
+namespace UsefulUtilities.Utilities;
+#else
+using static AutoNudge.AutoNudgeMod;
+namespace AutoNudge;
+#endif
+
+#if USEFUL_UTILITIES
 public class AutoNudge : UsefulUtility
+#else
+public class AutoNudgeUtility
+#endif
 {
+#if USEFUL_UTILITIES
+    
     private static readonly ModSettingHotkey NudgeToClosest = new(KeyCode.Tab)
     {
         description = "HotKey that will automatically nudge towers to the closest valid spot while placing them.",
@@ -45,7 +58,12 @@ public class AutoNudge : UsefulUtility
 
     protected override bool CreateCategory => true;
 
-    public override void OnUpdate()
+    public override void OnUpdate() => Update();
+#else
+    private static ModSettingHotkey NudgeToClosest => AutoNudgeHotkey;
+#endif
+
+    public static void Update()
     {
         if (InGame.instance == null || InGame.instance.bridge == null) return;
 
@@ -90,7 +108,7 @@ public class AutoNudge : UsefulUtility
 
             if (i++ > 20000)
             {
-                ModHelper.Msg<UsefulUtilitiesMod>("No spot found");
+                MelonLogger.Msg("No spot found");
                 return;
             }
         }

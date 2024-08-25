@@ -6,19 +6,35 @@ using Il2CppAssets.Scripts.Data;
 using Il2CppAssets.Scripts.Data.Cosmetics.Pets;
 using Il2CppAssets.Scripts.Data.TrophyStore;
 
+#if USEFUL_UTILITIES
 namespace UsefulUtilities.Utilities;
+#else
+namespace IndiscriminatePets;
+#endif
 
+#if USEFUL_UTILITIES
 public class IndiscriminatePets : ToggleableUtility
+#else
+public class IndiscriminatePetsUtility
+#endif
 {
-    private static readonly Dictionary<string, string> PetSkinIds = new();
-    
+#if USEFUL_UTILITIES
     protected override bool DefaultEnabled => true;
 
     protected override ModSettingCategory Category => UsefulUtilitiesMod.TrophyStore;
 
     public override string Description => "Allows trophy store pets to apply to all skins of the hero they're for.";
 
-    public override void OnSaveSettings()
+    private static bool IsEnabled => GetInstance<IndiscriminatePets>().Enabled;
+
+    public override void OnSaveSettings() => ModifyItems();
+#else
+    private const bool IsEnabled = true;
+#endif
+
+    private static readonly Dictionary<string, string> PetSkinIds = new();
+
+    public static void ModifyItems()
     {
         var trophyStoreItems = GameData.Instance.trophyStoreItems;
 
@@ -31,7 +47,7 @@ public class IndiscriminatePets : ToggleableUtility
         {
             PetSkinIds.TryAdd(pet.id, pet.skinId);
 
-            pet.skinId = Enabled ? "" : PetSkinIds[pet.id];
+            pet.skinId = IsEnabled ? "" : PetSkinIds[pet.id];
         }
     }
 }

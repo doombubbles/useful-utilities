@@ -13,10 +13,28 @@ using Il2CppNinjaKiwi.Common;
 using UnityEngine;
 using Vector3 = Il2CppAssets.Scripts.Simulation.SMath.Vector3;
 
+#if USEFUL_UTILITIES
 namespace UsefulUtilities.Utilities;
+#else
+using static CopyPasteTowers.CopyPasteTowersMod;
+namespace CopyPasteTowers;
+#endif
 
+#if USEFUL_UTILITIES
 public class CopyPasteTowers : UsefulUtility
+#else
+public class CopyPasteTowersUtility
+#endif
 {
+#if USEFUL_UTILITIES
+    private static readonly ModSettingHotkey CopyTower = new(KeyCode.C, HotkeyModifier.Ctrl);
+    private static readonly ModSettingHotkey PasteTower = new(KeyCode.V, HotkeyModifier.Ctrl);
+    private static readonly ModSettingHotkey CutTower = new(KeyCode.X, HotkeyModifier.Ctrl);
+    protected override bool CreateCategory => true;
+    
+    public override void OnUpdate() => Update();
+#endif
+
     private static TowerModel? clipboard;
     private static double cost;
     private static int payForIt;
@@ -24,12 +42,7 @@ public class CopyPasteTowers : UsefulUtility
     private static bool lastCopyWasCut;
     private static TargetType? targetType;
 
-    private static readonly ModSettingHotkey CopyTower = new(KeyCode.C, HotkeyModifier.Ctrl);
-    private static readonly ModSettingHotkey PasteTower = new(KeyCode.V, HotkeyModifier.Ctrl);
-    private static readonly ModSettingHotkey CutTower = new(KeyCode.X, HotkeyModifier.Ctrl);
-    protected override bool CreateCategory => true;
-
-    public override void OnUpdate()
+    public static void Update()
     {
         if (!InGame.instance) return;
 
@@ -96,7 +109,7 @@ public class CopyPasteTowers : UsefulUtility
             }
             catch (Exception e)
             {
-                ModHelper.Error<UsefulUtilitiesMod>(e);
+                MelonLogger.Error(e);
             }
         }), new ObjectId {data = (uint) InGame.instance.bridge.GetInputId()});
     }

@@ -23,14 +23,29 @@ using MelonLoader;
 using UnityEngine;
 using static BTD_Mod_Helper.Api.Enums.VanillaSprites;
 
+
+#if USEFUL_UTILITIES
 namespace UsefulUtilities.Utilities;
+#else
+namespace SacrificeHelper;
+#endif
+
+#if USEFUL_UTILITIES
+using BTD_Mod_Helper.Api.Data;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 public class SacrificeHelper : UsefulUtility
+#else
+public class SacrificeHelperUtility : IModSettings
+#endif
 {
+    
+#if USEFUL_UTILITIES
     protected override string Icon => BloodSacrificeAA;
 
     protected override bool CreateCategory => true;
-
+#endif
+    
     private static readonly ModSettingBool TempleSacrificeInfo = new(true)
     {
         description =
@@ -45,7 +60,6 @@ public class SacrificeHelper : UsefulUtility
             "and also how much power is coming from each source.",
         icon = PerfectParagonIcon
     };
-
 
     [HarmonyPatch(typeof(TowerSelectionMenu), nameof(TowerSelectionMenu.UpdateTower))]
     internal static class TowerSelectionMenu_UpdateTower
@@ -171,7 +185,7 @@ public class SacrificeHelper : UsefulUtility
             var tower = menu.selectedTower;
             if (tower == null)
             {
-                ModHelper.Warning<UsefulUtilitiesMod>("Couldn't update Paragon Helper UI because tower was null");
+                MelonLogger.Warning("Couldn't update Paragon Helper UI because tower was null");
                 return;
             }
 
@@ -410,41 +424,61 @@ public class SacrificeHelper : UsefulUtility
             activeAt = -1
         };
 
-        public static int GetParagonDegree(TowerToSimulation tower, out ParagonTower.InvestmentInfo investmentInfo, float bonus = 0)
+        public static long GetParagonDegree(TowerToSimulation tower, out ParagonTower.InvestmentInfo investmentInfo,
+            float bonus = 0)
         {
-            var degreeDataModel = InGame.instance.GetGameModel().paragonDegreeDataModel;
-            var degree = 0;
-            var index = 0;
-            investmentInfo = default;
+            var gameModel = tower.sim.Model;
+            var degreeDataModel = gameModel.paragonDegreeDataModel;
 
-            var paragonCost = tower.GetUpgradeCost(0, 6, -1, true);
-
-            var paragonTower = FakeParagonTower(tower.tower);
-
-            paragonTower.upgradeCost = paragonCost;
+            var paragonCost = tower.IsParagon
+                ? gameModel.GetParagonUpgradeForTowerId(tower.Def.baseId).cost
+                : tower.GetUpgradeCost(0, 6, -1, true);
+            var powerFromMoneySpent = bonus * degreeDataModel.moneySpentOverX /
+                                      ((1 + degreeDataModel.paidContributionPenalty) * paragonCost);
 
             var bonusInvestment = new ParagonTower.InvestmentInfo
             {
-                powerFromMoneySpent = (bonus * degreeDataModel.moneySpentOverX) /
+                powerFromMoneySpent = bonus * degreeDataModel.moneySpentOverX /
                                       ((1 + degreeDataModel.paidContributionPenalty) * paragonCost)
             };
 
-            investmentInfo = InGame.instance.GetAllTowerToSim()
-                .Where(tts =>
-                    tts.Def.baseId == tower.Def.baseId || tts.Def.GetChild<ParagonSacrificeBonusModel>() != null)
-                .OrderBy(tts => paragonTower.GetTowerInvestment(tts.tower).totalInvestment)
-                .Select(tts => paragonTower.GetTowerInvestment(tts.tower, tts.Def.tier >= 5 ? index++ : 3))
-                .Aggregate(bonusInvestment, paragonTower.CombineInvestments);
-
-
-            var requirements = degreeDataModel.powerDegreeRequirements;
-
-            while (investmentInfo.totalInvestment >= requirements[degree])
+            if (tower.tower.entity.GetBehavior<ParagonTower>().Is(out var paragonTower))
             {
-                degree++;
-                if (degree == 100)
+                investmentInfo = paragonTower.investmentInfo with
                 {
-                    break;
+                    totalInvestment = paragonTower.investmentInfo.totalInvestment + powerFromMoneySpent
+                };
+            }
+            else
+            {
+                paragonTower = FakeParagonTower(tower.tower);
+                paragonTower.upgradeCost = paragonCost;
+
+                var index = 0;
+                investmentInfo = InGame.instance.GetAllTowerToSim()
+                    .Where(tts =>
+                        tts.Def.baseId == tower.Def.baseId || tts.Def.GetChild<ParagonSacrificeBonusModel>() != null)
+                    .OrderBy(tts => paragonTower.GetTowerInvestment(tts.tower).totalInvestment)
+                    .Select(tts => paragonTower.GetTowerInvestment(tts.tower, tts.Def.tier >= 5 ? index++ : 3))
+                    .Aggregate(bonusInvestment, paragonTower.CombineInvestments);
+            }
+
+
+            var degree = 0L;
+
+            if (ModHelper.HasMod("Paragonomics", out var paragonomics))
+            {
+                degree = (int) paragonomics.Call("GetDegree", investmentInfo.totalInvestment);
+            }
+            else
+            {
+                while (investmentInfo.totalInvestment >= degreeDataModel.powerDegreeRequirements[(int)degree])
+                {
+                    degree++;
+                    if (degree == degreeDataModel.powerDegreeRequirements.Length)
+                    {
+                        break;
+                    }
                 }
             }
 
@@ -459,12 +493,25 @@ public class SacrificeHelper : UsefulUtility
         private static void Postfix(ParagonConfirmationPopup __instance, float current)
         {
             var tower = TowerSelectionMenu.instance.selectedTower;
+            var bonus = current;
+            var upgradeCost = InGame.Bridge.Model.GetParagonUpgradeForTowerId(tower.Def.baseId).cost;
+            if (__instance.upgradeCost != 0 && InGame.Bridge.GetCash() < upgradeCost)
+            {
+                // Handle Paragonomics negative degree
+                bonus += __instance.upgradeCost;
+                bonus -= upgradeCost;
+            }
 
-            var degree = Utils.GetParagonDegree(tower, out _, current);
+            var degree = Utils.GetParagonDegree(tower, out _, bonus);
 
             var text = __instance.transform.GetComponentFromChildrenByName<NK_TextMeshProUGUI>("DegreeText");
             text.SetText(degree.ToString());
-            text.color = degree >= 100 ? Color.green : Color.white;
+            text.color = Color.white;
+            if (degree >= 100 &&
+                (bool?) ModHelper.GetMod("Paragonomics")?.ModSettings["NoDegreeLimit"].GetValue() != true)
+            {
+                text.color = Color.green;
+            }
         }
     }
 
@@ -477,7 +524,16 @@ public class SacrificeHelper : UsefulUtility
         private static void Postfix(ParagonConfirmationPopup __instance)
         {
             var tower = TowerSelectionMenu.instance.selectedTower;
-            var degree = Utils.GetParagonDegree(tower, out _);
+            var bonus = 0;
+            var upgradeCost = InGame.Bridge.Model.GetParagonUpgradeForTowerId(tower.Def.baseId).cost;
+            if (__instance.upgradeCost != 0 && InGame.Bridge.GetCash() < upgradeCost)
+            {
+                // Handle Paragonomics negative degree
+                bonus += __instance.upgradeCost;
+                bonus -= upgradeCost;
+            }
+
+            var degree = Utils.GetParagonDegree(tower, out _, bonus);
 
             var mainObject = __instance.animator.gameObject;
 

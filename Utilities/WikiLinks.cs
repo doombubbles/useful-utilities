@@ -199,11 +199,9 @@ public class WikiLinks : ToggleableUtility
     }
 
 #if DEBUG
-    public override void OnRegister()
-    {
-        // Task.Run(GenerateWikiLinks);
-    }
 
+    private static readonly ModSettingButton GenerateLinks = new(() => Task.Run(GenerateWikiLinks));
+    
     private static async void GenerateWikiLinks()
     {
         var jobject = new JObject();

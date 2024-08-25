@@ -36,6 +36,7 @@ shop for BTD6 utilities.
 ### Other Mod Features Fully Included
 
 - Auto Nudge
+  - Press a hotkey while placing a tower to move your mouse to the nearest position where it could be placed
 - Better Auto Start
 - Copy/Paste Towers
 - Indiscriminate Pets
