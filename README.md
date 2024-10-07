@@ -25,13 +25,16 @@ shop for BTD6 utilities.
   - Hotkey to toggle Full Screen mode. Will remember your preferred screen resolution for each mode
 - Tower Selection Hotkeys
   - Hotkeys for cycling through which tower you have selected
-    corresponding BTD6 wiki page
 - Cursor Size Hotkeys
     - Hotkeys for changing the Cursor Size
 - Paragon Sentry Targeting
   - Gives the Green Paragon Sentry the same targeting options as Dartling Gunners
 - Keep Default Upgrade Sounds
     - For if you want to use the Firework Upgrade effect while maintaining your sanity
+- UI Transparency
+  - New slider within the acccesibility page that can make UI like the tower select menu partially transparent
+- Auto Trap Retarget
+  - Automatically retarget Larger Service Area Bloon Traps so they refresh at the start of each round
 
 ### Other Mod Features Fully Included
 
