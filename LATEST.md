@@ -1,5 +1,1 @@
-- Added an Auto Retarget Bloon Traps setting that can make Engineers with Larger Service Area periodically replace their traps to refersh them
-- Added an In Game UI Transparency slider that can chance the opacity of certain UI elements that block the map area like the Tower Selection Menu
-  - This slider is viewable in the in game Accessibility Settings menu like the effects slider, but if you want to make the change be persistent you'll need to edit it in the normal Mod Settings page
-- Updated Wiki Links for recent additions like the Mermonkey
-- Made In Game Hero Switch persist your switches more often when saving/loading
+- Fixed for BTD6 v45.0
