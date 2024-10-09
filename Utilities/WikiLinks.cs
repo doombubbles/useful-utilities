@@ -12,7 +12,7 @@ using Il2CppAssets.Scripts.Unity.UI_New.HeroInGame;
 using Il2CppAssets.Scripts.Unity.UI_New.Main.HeroSelect;
 using Il2CppAssets.Scripts.Unity.UI_New.Main.PowersSelect;
 using Il2CppAssets.Scripts.Unity.UI_New.Upgrade;
-using Il2CppNinjaKiwi.Players.LiNKAccountControllers;
+using Il2CppNinjaKiwi.LiNK.Client.LiNKAccountControllers;
 using Il2CppTMPro;
 using Newtonsoft.Json.Linq;
 using UnityEngine.UI;
@@ -131,8 +131,7 @@ public class WikiLinks : ToggleableUtility
             .GetType("BTD_Mod_Helper.UI.BTD6.EmbeddedBrowser")!;
         var open = embeddedBrowser.GetMethod("OpenURL", BindingFlags.NonPublic | BindingFlags.Static)!;
 
-        open.Invoke(null, new object?[]
-        {
+        open.Invoke(null, [
             fullLink, new Action<SteamWebView>(view =>
             {
                 view.EvaluateJavaScript(cleanWikiPageScript);
@@ -142,7 +141,7 @@ public class WikiLinks : ToggleableUtility
                     TaskScheduler.ScheduleTask(() => view.Exists()?.Reload(), ScheduleType.WaitForSeconds, 1);
                 }
             })
-        });
+        ]);
         
     }
 
