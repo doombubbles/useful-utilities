@@ -93,6 +93,8 @@ public class InGameHeroSwitchUtility
 
         ResetInventory(newHero);
         CurrentHero = newHero;
+        
+        InGame.instance.InputManager.SetSelected(null);
     }
 
     private static void ResetInventory(string newHero)

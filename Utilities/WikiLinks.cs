@@ -39,7 +39,7 @@ public class WikiLinks : ToggleableUtility
     private static readonly Dictionary<string, string> WikiLinkTable = new();
     private static string cleanWikiPageScript = null!;
 
-    private static readonly ModSettingBool EmbeddedBrowser = new(true)
+    private static readonly ModSettingBool EmbeddedBrowser = new(false)
     {
         description = "Open links in embedded BTD6 browser rather than the external browser",
         icon = VanillaSprites.GwendolinFirefoxPetIcon

@@ -1,4 +1,5 @@
-﻿using BTD_Mod_Helper.Api.ModOptions;
+﻿using BTD_Mod_Helper.Api;
+using BTD_Mod_Helper.Api.ModOptions;
 using Il2Cpp;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppGeom;
@@ -7,9 +8,7 @@ using UnityEngine.InputSystem;
 using Random = System.Random;
 
 #if USEFUL_UTILITIES
-using BTD_Mod_Helper;
 using BTD_Mod_Helper.Api.Enums;
-using MelonLoader;
 
 namespace UsefulUtilities.Utilities;
 #else
@@ -24,7 +23,7 @@ public class AutoNudgeUtility
 #endif
 {
 #if USEFUL_UTILITIES
-    
+
     private static readonly ModSettingHotkey NudgeToClosest = new(KeyCode.Tab)
     {
         description = "HotKey that will automatically nudge towers to the closest valid spot while placing them.",
@@ -74,6 +73,10 @@ public class AutoNudgeUtility
         if (NudgeToClosest.JustPressed())
         {
             NudgeClosest();
+            if (ConfirmPlacement.IsPressed())
+            {
+                TaskScheduler.ScheduleTask(() => inputManager.TryPlace());
+            }
         }
         else
         {

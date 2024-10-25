@@ -12,18 +12,13 @@ using UsefulUtilities;
 [assembly: MelonInfo(typeof(UsefulUtilitiesMod), ModHelperData.Name, ModHelperData.Version, ModHelperData.RepoOwner)]
 [assembly: MelonGame("Ninja Kiwi", "BloonsTD6")]
 [assembly: HarmonyDontPatchAll]
+[assembly: MelonOptionalDependencies("NAudio")]
 
 namespace UsefulUtilities;
 
 public class UsefulUtilitiesMod : BloonsTD6Mod
 {
     public static readonly Dictionary<string, UsefulUtility> UsefulUtilities = new();
-
-    public static readonly ModSettingCategory Targeting = new("Targeting")
-    {
-        icon = VanillaSprites.CamoTargetIconCross,
-        order = 2
-    };
 
     public static readonly ModSettingCategory Sandbox = new("Sandbox")
     {

@@ -31,7 +31,7 @@ public class CopyPasteTowersUtility
     private static readonly ModSettingHotkey PasteTower = new(KeyCode.V, HotkeyModifier.Ctrl);
     private static readonly ModSettingHotkey CutTower = new(KeyCode.X, HotkeyModifier.Ctrl);
     protected override bool CreateCategory => true;
-    
+
     public override void OnUpdate() => Update();
 #endif
 
@@ -70,7 +70,7 @@ public class CopyPasteTowersUtility
         }
 
         if (PasteTower.JustPressed() ||
-            justPastedTower && (PasteTower.IsPressed() || Input.GetKey(KeyCode.LeftShift)))
+            justPastedTower && (PasteTower.IsPressed() || MultiPlace.MultiPlaceModifier.IsPressed()))
         {
             Paste();
         }

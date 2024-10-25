@@ -16,16 +16,19 @@
         <ProjectName>UsefulUtilities.Lite</ProjectName>
     </PropertyGroup>
 
+    <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+        <PackageReference Include="NAudio" Version="2.2.1"/>
+        <PackageReference Include="NAudio.WinMM" Version="2.2.1"/>
+    </ItemGroup>
+
     <Import Project="..\btd6.targets" />
     
     <ItemGroup Condition="'$(Configuration)' == 'ReleaseLite'">
         <Compile Remove="Utilities/AutoNudge.cs" />
         <Compile Remove="Utilities/BetterAutoStart.cs" />
         <Compile Remove="Utilities/CopyPasteTowers.cs" />
-        <Compile Remove="Utilities/DartlingGunnerTargeting.cs" />
         <Compile Remove="Utilities/IndiscriminatePets.cs" />
         <Compile Remove="Utilities/InGameHeroSwitch.cs" />
-        <Compile Remove="Utilities/MortarMonkeyTargeting.cs" />
         <Compile Remove="Utilities/SacrificeHelper.cs" />
     </ItemGroup>
     
