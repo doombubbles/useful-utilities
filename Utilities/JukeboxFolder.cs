@@ -22,27 +22,60 @@ public class JukeboxFolder : UsefulUtility
         {
             displayName = "Jukebox Folder",
             icon = VanillaSprites.JukeboxIcon,
+            category = UsefulUtilitiesMod.Jukebox,
             description =
                 "Any .mp3 or .wav files you put in this folder will be automatically loaded into the BTD6 Jukebox. " +
                 "Can add new tracks from files without restarting the game, but can't delete them.",
             onSave = newPath =>
             {
                 watcher!.Path = newPath;
-                LoadAllTracks(newPath);
+                TaskRun(() => LoadAllTracks(newPath));
             }
         };
 
     private static FileSystemWatcher watcher = null!;
 
+    public static readonly ModSettingBool LoadAsynchronously = new(true)
+    {
+        description = "Whether to load in tracks asynchronously on a separate thread or directly on the main thread",
+        icon = VanillaSprites.JukeboxIcon,
+        category = UsefulUtilitiesMod.Jukebox,
+    };
+
+    private static void TaskRun(Action action)
+    {
+        if (LoadAsynchronously)
+        {
+            Task.Run(action);
+        }
+        else
+        {
+            action();
+        }
+    }
+
+    private static void TaskSchedule(Action action)
+    {
+        if (LoadAsynchronously)
+        {
+            TaskScheduler.ScheduleTask(action);
+        }
+        else
+        {
+            action();
+        }
+    }
+
     public override void OnRegister()
     {
-        LoadAllTracks(FolderPath);
+        TaskRun(() => LoadAllTracks(FolderPath));
 
         watcher = new FileSystemWatcher(FolderPath);
         watcher.Filters.Add("*.mp3");
         watcher.Filters.Add("*.wav");
         watcher.IncludeSubdirectories = true;
-        watcher.Created += (_, args) => LoadTrack(args.FullPath);
+        watcher.Created += (_, args) => TaskScheduler.ScheduleTask(() => TaskRun(() => LoadTrack(args.FullPath)),
+            ScheduleType.WaitForSeconds, 1);
         watcher.EnableRaisingEvents = true;
     }
 
@@ -62,61 +95,51 @@ public class JukeboxFolder : UsefulUtility
     {
         var name = Path.GetFileNameWithoutExtension(filePath);
         var id = GetInstance<UsefulUtilitiesMod>().IDPrefix + name;
-        var extension = Path.GetExtension(filePath);
 
         if (ResourceHandler.AudioClips.ContainsKey(id)) return;
 
-#if DEBUG
-        var start = DateTime.Now;
-#endif
         ModHelper.Msg<UsefulUtilitiesMod>($"Adding track \"{name}\" from {filePath}");
-        Task.Run(() =>
+        var start = DateTime.Now;
+        var extension = Path.GetExtension(filePath);
+        try
         {
-            try
+            AudioClip? audioClip = null;
+
+            switch (extension)
             {
-                AudioClip? audioClip = null;
-
-                switch (extension)
-                {
-                    case ".mp3":
-                        using (var mp3Reader = new Mp3FileReader(filePath))
-                        {
-                            audioClip = ResourceHandler.CreateAudioClip(mp3Reader, id);
-                        }
-
-                        break;
-                    case ".wav":
-                        using (var wavReader = new WaveFileReader(filePath))
-                        {
-                            audioClip = ResourceHandler.CreateAudioClip(wavReader, id);
-                        }
-
-                        break;
-                }
-
-                if (audioClip is not null)
-                {
-                    TaskScheduler.ScheduleTask(() =>
+                case ".mp3":
+                    using (var mp3Reader = new Mp3FileReader(filePath))
                     {
-                        var track = new FileJukeboxTrack(name, audioClip);
-                        track.Register();
-                        track.RegisterText(LocalizationManager.Instance.defaultTable);
-#if DEBUG
-                        var end = DateTime.Now;
-                        ModHelper.Msg<UsefulUtilitiesMod>(
-                            $"Successfully processed track {name} duration  in {(end - start).TotalSeconds:N1}s");
-#endif
-                    });
-                    return;
-                }
-            }
-            catch (Exception e)
-            {
-                ModHelper.Error<UsefulUtilitiesMod>(e);
+                        audioClip = ResourceHandler.CreateAudioClip(mp3Reader, id);
+                    }
+
+                    break;
+                case ".wav":
+                    using (var wavReader = new WaveFileReader(filePath))
+                    {
+                        audioClip = ResourceHandler.CreateAudioClip(wavReader, id);
+                    }
+
+                    break;
             }
 
+            if (audioClip is null) return;
+
+            TaskSchedule(() =>
+            {
+                var track = new FileJukeboxTrack(name, audioClip);
+                track.Register();
+                track.RegisterText(LocalizationManager.Instance.defaultTable);
+                var end = DateTime.Now;
+                ModHelper.Msg<UsefulUtilitiesMod>(
+                    $"Successfully processed track {name} duration {audioClip.length} in {(end - start).TotalSeconds:N1}s");
+            });
+        }
+        catch (Exception e)
+        {
+            ModHelper.Error<UsefulUtilitiesMod>(e);
             ModHelper.Error<UsefulUtilitiesMod>($"Unable to parse potential jukebox track file {filePath}");
-        });
+        }
     }
 
     private class FileJukeboxTrack : ModJukeboxTrack

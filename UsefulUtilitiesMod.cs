@@ -20,6 +20,12 @@ public class UsefulUtilitiesMod : BloonsTD6Mod
 {
     public static readonly Dictionary<string, UsefulUtility> UsefulUtilities = new();
 
+    public static readonly ModSettingCategory Jukebox = new("Jukebox")
+    {
+        icon = VanillaSprites.SandboxBtn,
+        order = 2,
+    };
+    
     public static readonly ModSettingCategory Sandbox = new("Sandbox")
     {
         icon = VanillaSprites.SandboxBtn,
