@@ -20,7 +20,7 @@ public class QuickSell : ToggleableUtility
         {
             if (!InGame.instance.hotkeys.sell.isPressed || !GetInstance<QuickSell>().Enabled) return true;
             
-            InGame.Bridge.SellTower(tower.Id);
+            InGame.instance.SellTower(tower);
             return false;
         }
     }
