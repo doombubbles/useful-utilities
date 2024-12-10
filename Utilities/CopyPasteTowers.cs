@@ -49,7 +49,7 @@ public class CopyPasteTowersUtility
         if (TowerSelectionMenu.instance)
         {
             var selectedTower = TowerSelectionMenu.instance.selectedTower;
-            if (selectedTower is {IsParagon: false} && !selectedTower.tower.towerModel.IsHero())
+            if (selectedTower is { IsParagon: false } && !selectedTower.tower.towerModel.IsHero())
             {
                 lastCopyWasCut = CutTower.JustPressed();
                 if (CutTower.JustPressed() || CopyTower.JustPressed())
@@ -69,8 +69,11 @@ public class CopyPasteTowersUtility
             }
         }
 
-        if (PasteTower.JustPressed() ||
-            justPastedTower && (PasteTower.IsPressed() || MultiPlace.MultiPlaceModifier.IsPressed()))
+        if (PasteTower.JustPressed() || justPastedTower
+#if USEFUL_UTILITIES
+            && (PasteTower.IsPressed() || MultiPlace.MultiPlaceModifier.IsPressed())
+#endif
+           )
         {
             Paste();
         }
@@ -111,7 +114,7 @@ public class CopyPasteTowersUtility
             {
                 MelonLogger.Error(e);
             }
-        }), new ObjectId {data = (uint) InGame.instance.bridge.GetInputId()});
+        }), new ObjectId { data = (uint) InGame.instance.bridge.GetInputId() });
     }
 
     private static double CalculateCost(TowerModel towerModel, Vector3 pos = default)

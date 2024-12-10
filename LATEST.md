@@ -1,1 +1,1 @@
-- Fixed the Quick Sell setting bypassing selling restrictions 
+- Fixed console errors in v46
