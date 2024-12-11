@@ -36,16 +36,20 @@ using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 public class SacrificeHelper : UsefulUtility
 #else
+using BTD_Mod_Helper.Api.Helpers;
+using Il2CppAssets.Scripts.Unity;
+using BTD_Mod_Helper.Api.Data;
+using Il2CppAssets.Scripts.Models.Towers.Upgrades;
+
 public class SacrificeHelperUtility : IModSettings
 #endif
 {
-    
 #if USEFUL_UTILITIES
     protected override string Icon => BloodSacrificeAA;
 
     protected override bool CreateCategory => true;
 #endif
-    
+
     private static readonly ModSettingBool TempleSacrificeInfo = new(true)
     {
         description =
@@ -106,7 +110,16 @@ public class SacrificeHelperUtility : IModSettings
         public const int InfoWidth = 500;
         public const int InfoHeight = 100;
 
+#if USEFUL_UTILITIES
         private static bool showingExtraTempleInfo;
+#else
+        // ReSharper disable once InconsistentNaming
+        private static bool showingExtraTempleInfo
+        {
+            get => !SacrificeHelperMod.templeSacrificesOff;
+            set => SacrificeHelperMod.templeSacrificesOff = !value;
+        }
+#endif
         private static bool showingExtraParagonInfo;
 
         public TowerSelectionMenu menu = null!;
@@ -167,6 +180,9 @@ public class SacrificeHelperUtility : IModSettings
                 NotificationYellow, new Action(() =>
                 {
                     showingExtraTempleInfo = !showingExtraTempleInfo;
+#if !USEFUL_UTILITIES
+                    UpdateUpgradeCosts();
+#endif
                     UpdateExtraInfo();
                 }));
             sacrificeToggle.AddImage(new Info("SacrificeIcon", 80), BuffIconBloodSacrifice);
@@ -256,6 +272,32 @@ public class SacrificeHelperUtility : IModSettings
                 extraSacrificeInfo.SetActive(showingExtraTempleInfo);
             }
         }
+
+#if !USEFUL_UTILITIES
+        private void UpdateUpgradeCosts()
+        {
+            var gameModel = InGame.instance.GetGameModel();
+            var templeUpgrade = gameModel.GetUpgrade(UpgradeType.SunTemple);
+            var godUpgrade = gameModel.GetUpgrade(UpgradeType.TrueSunGod);
+            if (SacrificeHelperMod.templeSacrificesOff)
+            {
+                Utils.ModifyTemple(templeUpgrade);
+                Utils.ModifyGod(godUpgrade);
+            }
+            else
+            {
+                Utils.DefaultTemple(templeUpgrade);
+                Utils.DefaultGod(godUpgrade);
+            }
+
+            for (var i = 0; i < menu.upgradeButtons.Count; i++)
+            {
+                var upgradeButton = menu.upgradeButtons[i];
+                upgradeButton.UpdateCost();
+                upgradeButton.UpdateVisuals(i, false);
+            }
+        }
+#endif
 
         private static ModHelperText CreateInfoLine(ModHelperPanel parent, string id, string icon)
         {
@@ -348,6 +390,39 @@ public class SacrificeHelperUtility : IModSettings
 
     public static class Utils
     {
+#if !USEFUL_UTILITIES
+        public static void DefaultTemple(UpgradeModel upgradeModel)
+        {
+            upgradeModel.confirmation = UpgradeType.SunTemple;
+            var baseCost = Game.instance.model.GetUpgrade(upgradeModel.name).cost;
+            upgradeModel.cost = CostHelper.CostForDifficulty(baseCost, InGame.instance);
+        }
+
+        public static void ModifyTemple(UpgradeModel upgradeModel)
+        {
+            upgradeModel.confirmation = "";
+            var baseCost = Game.instance.model.GetUpgrade(upgradeModel.name).cost;
+            var mod = SacrificeHelperMod.TempleAlternateCostMod;
+            upgradeModel.cost = CostHelper.CostForDifficulty((int) (baseCost * mod), InGame.instance);
+        }
+
+        public static void DefaultGod(UpgradeModel upgradeModel)
+        {
+            upgradeModel.confirmation = UpgradeType.TrueSunGod;
+            var baseCost = Game.instance.model.GetUpgrade(upgradeModel.name).cost;
+            upgradeModel.cost = CostHelper.CostForDifficulty(baseCost, InGame.instance);
+        }
+
+        public static void ModifyGod(UpgradeModel upgradeModel)
+        {
+            upgradeModel.confirmation = "";
+            var baseCost = Game.instance.model.GetUpgrade(upgradeModel.name).cost;
+            var mod = SacrificeHelperMod.GodAlternateCostMod;
+            upgradeModel.cost = CostHelper.CostForDifficulty((int) (baseCost * mod), InGame.instance);
+        }
+
+#endif
+
         public static Dictionary<string, Color> GetColors(Dictionary<string, float> worths, bool god)
         {
             var ret = new Dictionary<string, Color>();
@@ -472,7 +547,7 @@ public class SacrificeHelperUtility : IModSettings
             }
             else
             {
-                while (investmentInfo.totalInvestment >= degreeDataModel.powerDegreeRequirements[(int)degree])
+                while (investmentInfo.totalInvestment >= degreeDataModel.powerDegreeRequirements[(int) degree])
                 {
                     degree++;
                     if (degree == degreeDataModel.powerDegreeRequirements.Length)

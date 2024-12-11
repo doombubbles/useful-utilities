@@ -49,12 +49,14 @@ public class CopyPasteTowersUtility
         if (TowerSelectionMenu.instance)
         {
             var selectedTower = TowerSelectionMenu.instance.selectedTower;
-            if (selectedTower is { IsParagon: false } && !selectedTower.tower.towerModel.IsHero())
+            var tower = selectedTower?.Def;
+            if (tower is { isParagon: false, isSubTower: false } && !tower.IsHero() &&
+                tower.name.StartsWith(tower.baseId))
             {
                 lastCopyWasCut = CutTower.JustPressed();
                 if (CutTower.JustPressed() || CopyTower.JustPressed())
                 {
-                    Copy(selectedTower.tower);
+                    Copy(selectedTower!.tower);
 
                     if (CutTower.JustPressed())
                     {

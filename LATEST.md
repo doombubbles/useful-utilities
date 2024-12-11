@@ -1,1 +1,1 @@
-- Fixed console errors in v46
+- Fixed being able to copy paste some towers that aren't normally placeable
