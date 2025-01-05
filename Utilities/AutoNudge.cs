@@ -64,7 +64,7 @@ public class AutoNudgeUtility
 
     public static void Update()
     {
-        if (InGame.instance == null || InGame.instance.bridge == null) return;
+        if (!InGame.instance || InGame.Bridge == null || InGame.instance.ReviewMapMode || InGame.Bridge.IsSpectatorMode) return;
 
         var inputManager = InGame.instance.InputManager;
 

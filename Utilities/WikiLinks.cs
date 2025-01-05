@@ -83,7 +83,7 @@ public class WikiLinks : ToggleableUtility
 
     private static void Setup(TextMeshProUGUI text, Func<string> getName, float? lineSpacing = null)
     {
-        if (!text.IsActive()) return;
+        if (!GetInstance<WikiLinks>().Enabled || !text.IsActive()) return;
 
         var current = getName();
         var hasLink = WikiLinkTable.ContainsKey(current);

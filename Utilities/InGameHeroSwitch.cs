@@ -41,7 +41,7 @@ public class InGameHeroSwitchUtility
 
     public static void Update()
     {
-        if (InGame.instance == null) return;
+        if (!InGame.instance || InGame.Bridge == null || InGame.instance.ReviewMapMode || InGame.Bridge.IsSpectatorMode) return;
 
         if (CycleDown.JustPressed()) cycleDown = true;
         if (CycleUp.JustPressed()) cycleUp = true;

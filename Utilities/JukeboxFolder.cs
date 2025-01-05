@@ -42,6 +42,11 @@ public class JukeboxFolder : UsefulUtility
         category = UsefulUtilitiesMod.Jukebox,
     };
 
+    public override void OnLoad()
+    {
+        if (!Directory.Exists(FolderPath)) Directory.CreateDirectory(FolderPath);
+    }
+
     private static void TaskRun(Action action)
     {
         if (LoadAsynchronously)
@@ -68,8 +73,8 @@ public class JukeboxFolder : UsefulUtility
 
     public override void OnRegister()
     {
-        TaskRun(() => LoadAllTracks(FolderPath));
-
+        if (!Directory.Exists(FolderPath)) Directory.CreateDirectory(FolderPath);
+        
         watcher = new FileSystemWatcher(FolderPath);
         watcher.Filters.Add("*.mp3");
         watcher.Filters.Add("*.wav");
@@ -77,6 +82,8 @@ public class JukeboxFolder : UsefulUtility
         watcher.Created += (_, args) => TaskScheduler.ScheduleTask(() => TaskRun(() => LoadTrack(args.FullPath)),
             ScheduleType.WaitForSeconds, 1);
         watcher.EnableRaisingEvents = true;
+        
+        TaskRun(() => LoadAllTracks(FolderPath));
     }
 
     public static void LoadAllTracks(string path)

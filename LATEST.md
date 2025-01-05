@@ -1,1 +1,3 @@
-- Fixed being able to copy paste some towers that aren't normally placeable
+- Fixed Wiki Links not all the turning off if disabled
+- Fixed some in-game utilities working in the review map menu
+- Fixed an error that affected Copy Pasted tower's total prices within discount villages

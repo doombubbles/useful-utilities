@@ -1,15 +1,18 @@
 ﻿using System;
 using BTD_Mod_Helper;
+using BTD_Mod_Helper.Api.Helpers;
 using BTD_Mod_Helper.Api.ModOptions;
 using BTD_Mod_Helper.Extensions;
 using HarmonyLib;
 using Il2CppAssets.Scripts;
 using Il2CppAssets.Scripts.Models.Towers;
 using Il2CppAssets.Scripts.Simulation.Towers;
+using Il2CppAssets.Scripts.Simulation.Towers.Behaviors;
 using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
 using Il2CppNinjaKiwi.Common;
+using Il2CppSystem.Collections.Generic;
 using UnityEngine;
 using Vector3 = Il2CppAssets.Scripts.Simulation.SMath.Vector3;
 
@@ -44,13 +47,14 @@ public class CopyPasteTowersUtility
 
     public static void Update()
     {
-        if (!InGame.instance) return;
+        if (!InGame.instance || InGame.Bridge == null || InGame.instance.ReviewMapMode || InGame.Bridge.IsSpectatorMode) return;
 
         if (TowerSelectionMenu.instance)
         {
             var selectedTower = TowerSelectionMenu.instance.selectedTower;
             var tower = selectedTower?.Def;
-            if (tower is { isParagon: false, isSubTower: false } && !tower.IsHero() &&
+            if (tower is {isParagon: false, isSubTower: false} &&
+                !tower.IsHero() &&
                 tower.name.StartsWith(tower.baseId))
             {
                 lastCopyWasCut = CutTower.JustPressed();
@@ -71,9 +75,11 @@ public class CopyPasteTowersUtility
             }
         }
 
-        if (PasteTower.JustPressed() || justPastedTower
+        if (PasteTower.JustPressed() ||
+            justPastedTower
 #if USEFUL_UTILITIES
-            && (PasteTower.IsPressed() || MultiPlace.MultiPlaceModifier.IsPressed())
+            &&
+            (PasteTower.IsPressed() || MultiPlace.MultiPlaceModifier.IsPressed())
 #endif
            )
         {
@@ -116,7 +122,7 @@ public class CopyPasteTowersUtility
             {
                 MelonLogger.Error(e);
             }
-        }), new ObjectId { data = (uint) InGame.instance.bridge.GetInputId() });
+        }), new ObjectId {data = (uint) InGame.instance.bridge.GetInputId()});
     }
 
     private static double CalculateCost(TowerModel towerModel, Vector3 pos = default)
@@ -126,29 +132,21 @@ public class CopyPasteTowersUtility
 
         var total = 0.0;
 
-        var discountMult = 0f;
-        if (pos != default)
-        {
-            var zoneDiscount =
-                towerManager.GetZoneDiscount(towerModel, pos, 0, 0, InGame.instance.bridge.MyPlayerNumber);
-            discountMult = towerManager.GetDiscountMultiplier(zoneDiscount);
-        }
+        var owner = InGame.instance.bridge.MyPlayerNumber;
 
-        total += (1 - discountMult) * towerModel.cost;
+        total += towerModel.cost;
 
         foreach (var appliedUpgrade in towerModel.appliedUpgrades)
         {
             var upgrade = inGameModel.GetUpgrade(appliedUpgrade);
 
-            discountMult = 0f;
+            var discountMult = 0f;
             if (pos != default)
             {
-                var zoneDiscount = towerManager.GetZoneDiscount(towerModel, pos, upgrade.path, upgrade.tier,
-                    InGame.instance.bridge.MyPlayerNumber);
-                discountMult = towerManager.GetDiscountMultiplier(zoneDiscount);
+                discountMult = towerManager.GetDiscountMultiplier(towerManager.GetZoneDiscount(towerModel, pos, upgrade.path, upgrade.tier + 1, owner));
             }
 
-            total += upgrade.cost * (1 - discountMult);
+            total += CostHelper.CostForDifficulty(upgrade.cost, 1 - discountMult);
         }
 
         return total;

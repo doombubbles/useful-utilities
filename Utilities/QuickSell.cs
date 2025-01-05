@@ -18,6 +18,8 @@ public class QuickSell : ToggleableUtility
         [HarmonyPostfix]
         internal static bool Prefix(TowerToSimulation tower)
         {
+            if (!InGame.instance || InGame.Bridge == null || InGame.instance.ReviewMapMode || InGame.Bridge.IsSpectatorMode) return true;
+            
             if (!InGame.instance.hotkeys.sell.isPressed || !GetInstance<QuickSell>().Enabled) return true;
             
             InGame.instance.SellTower(tower);
