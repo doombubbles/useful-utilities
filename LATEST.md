@@ -1,3 +1,5 @@
-- Fixed Wiki Links not all the turning off if disabled
-- Fixed some in-game utilities working in the review map menu
-- Fixed an error that affected Copy Pasted tower's total prices within discount villages
+- Copy/Paste Clipboard is no longer saved between games
+- The following utilities will not be active within the new Rogue Legends mode
+  - Copy/Paste Towers
+  - In Game Hero Switch
+  - Multi Place

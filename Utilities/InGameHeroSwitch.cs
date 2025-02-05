@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using BTD_Mod_Helper.Extensions;
 using HarmonyLib;
+using Il2CppAssets.Scripts.Models;
 using Il2CppAssets.Scripts.Models.TowerSets;
 using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.Bridge;
@@ -41,7 +42,7 @@ public class InGameHeroSwitchUtility
 
     public static void Update()
     {
-        if (!InGame.instance || InGame.Bridge == null || InGame.instance.ReviewMapMode || InGame.Bridge.IsSpectatorMode) return;
+        if (!InGame.instance || InGame.Bridge == null || InGame.instance.ReviewMapMode || InGame.Bridge.IsSpectatorMode || InGame.instance.GameType == GameType.Rogue) return;
 
         if (CycleDown.JustPressed()) cycleDown = true;
         if (CycleUp.JustPressed()) cycleUp = true;

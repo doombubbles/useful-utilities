@@ -5,7 +5,9 @@ using BTD_Mod_Helper.Api.ModOptions;
 using BTD_Mod_Helper.Extensions;
 using HarmonyLib;
 using Il2CppAssets.Scripts;
+using Il2CppAssets.Scripts.Models;
 using Il2CppAssets.Scripts.Models.Towers;
+using Il2CppAssets.Scripts.Simulation;
 using Il2CppAssets.Scripts.Simulation.Towers;
 using Il2CppAssets.Scripts.Simulation.Towers.Behaviors;
 using Il2CppAssets.Scripts.Unity;
@@ -47,7 +49,7 @@ public class CopyPasteTowersUtility
 
     public static void Update()
     {
-        if (!InGame.instance || InGame.Bridge == null || InGame.instance.ReviewMapMode || InGame.Bridge.IsSpectatorMode) return;
+        if (!InGame.instance || InGame.Bridge == null || InGame.instance.ReviewMapMode || InGame.Bridge.IsSpectatorMode || InGame.instance.GameType == GameType.Rogue) return;
 
         if (TowerSelectionMenu.instance)
         {
@@ -177,6 +179,19 @@ public class CopyPasteTowersUtility
             {
                 __instance.SetTargetType(targetType);
             }
+        }
+    }
+
+    /// <summary>
+    /// Clear clipboard on Match Start, Restart, Continue, Exit
+    /// </summary>
+    [HarmonyPatch(typeof(TimeManager), nameof(TimeManager.ResetNow))]
+    internal static class TimeManager_ResetNow
+    {
+        [HarmonyPostfix]
+        internal static void Postfix()
+        {
+            clipboard = null;
         }
     }
 }

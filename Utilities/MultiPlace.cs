@@ -1,6 +1,7 @@
 ﻿using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.ModOptions;
 using HarmonyLib;
+using Il2CppAssets.Scripts.Models;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using UnityEngine;
 
@@ -19,7 +20,7 @@ public class MultiPlace : UsefulUtility
         [HarmonyPrefix]
         internal static void Prefix(InputManager __instance)
         {
-            if (!MultiPlaceModifier.IsPressed() || !__instance.inTowerMode) return;
+            if (!MultiPlaceModifier.IsPressed() || !__instance.inTowerMode || InGame.instance.GameType == GameType.Rogue) return;
             
             var tb = __instance.towerButton;
             var tm = __instance.towerModel;
@@ -33,7 +34,7 @@ public class MultiPlace : UsefulUtility
         [HarmonyPrefix]
         internal static void Prefix(InputManager __instance)
         {
-            if (!MultiPlaceModifier.IsPressed() || !__instance.inPowerMode) return;
+            if (!MultiPlaceModifier.IsPressed() || !__instance.inPowerMode || InGame.instance.GameType == GameType.Rogue) return;
             
             var pb = __instance.powerButton;
             var pm = __instance.powerModel;
@@ -47,7 +48,7 @@ public class MultiPlace : UsefulUtility
         [HarmonyPrefix]
         internal static void Prefix(InputManager __instance)
         {
-            if (!MultiPlaceModifier.IsPressed() || !__instance.inInstaMode) return;
+            if (!MultiPlaceModifier.IsPressed() || !__instance.inInstaMode || InGame.instance.GameType == GameType.Rogue) return;
             
             var ib = __instance.instaButton;
             var im = __instance.instaModel;
@@ -61,7 +62,7 @@ public class MultiPlace : UsefulUtility
         [HarmonyPrefix]
         internal static void Prefix(InputManager __instance)
         {
-            if (!MultiPlaceModifier.IsPressed() || !__instance.inGeraldoShopItemMode) return;
+            if (!MultiPlaceModifier.IsPressed() || !__instance.inGeraldoShopItemMode || InGame.instance.GameType == GameType.Rogue) return;
             
             var itemUi = __instance.towerBasedShopItemUi;
             var model = __instance.towerShopItemModel;
