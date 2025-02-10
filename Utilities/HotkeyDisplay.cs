@@ -38,7 +38,7 @@ public class HotkeyDisplay : ToggleableUtility
 
     protected override string Icon => VanillaSprites.HotkeysIcon;
 
-    private static void UpdateHotkeyDisplay(TowerPurchaseButton2D button, HotkeyButton hotkeyButton)
+    private static void UpdateHotkeyDisplay(TowerPurchaseButton button, HotkeyButton hotkeyButton)
     {
         if (button == null) return;
 
@@ -54,7 +54,7 @@ public class HotkeyDisplay : ToggleableUtility
                 Width = -50, Height = 75, AnchorMin = new Vector2(0, 1), AnchorMax = new Vector2(1, 1),
                 Pivot = new Vector2(0.5f, 1)
             }, "", 48, TextAlignmentOptions.Right));
-            text.transform.MoveAfterSibling(button.icon.transform, true);
+            text.transform.MoveAfterSibling(button.costText.transform, true);
             text.Text.fontSizeMax = 48;
             text.Text.enableAutoSizing = true;
             text.Text.color = new Color(1, 1, 1, TextOpacity);
@@ -94,16 +94,16 @@ public class HotkeyDisplay : ToggleableUtility
         {
             if (!GetInstance<HotkeyDisplay>().Enabled) return;
 
-            if (__instance.HeroButton.Is(out TowerPurchaseButton2D towerPurchaseButton2D))
+            if (__instance.HeroButton.Is(out TowerPurchaseButton towerPurchaseButton))
             {
-                UpdateHotkeyDisplay(towerPurchaseButton2D, __instance.heroHotkey);
+                UpdateHotkeyDisplay(towerPurchaseButton, __instance.heroHotkey);
             }
 
             foreach (var towerHotkey in __instance.towerHotkeys)
             {
-                if (towerHotkey.towerPurchaseButton.Is(out towerPurchaseButton2D))
+                if (towerHotkey.towerPurchaseButton.Is(out towerPurchaseButton))
                 {
-                    UpdateHotkeyDisplay(towerPurchaseButton2D, towerHotkey.hotkeyButton);
+                    UpdateHotkeyDisplay(towerPurchaseButton, towerHotkey.hotkeyButton);
                 }
             }
         }

@@ -38,7 +38,6 @@
     
     <ItemGroup>
       <EmbeddedResource Include="Resources\wiki_links.json" />
-      <EmbeddedResource Include="clean-wiki-page.js" />
     </ItemGroup>
     
 </Project>

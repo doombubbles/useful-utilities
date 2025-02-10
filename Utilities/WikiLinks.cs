@@ -22,6 +22,7 @@ using TaskScheduler = BTD_Mod_Helper.Api.TaskScheduler;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using BTD_Mod_Helper.Api.Commands;
 using BTD_Mod_Helper.Api.ModMenu;
 using Il2CppAssets.Scripts.Unity;
 using Il2CppNinjaKiwi.Common;
@@ -32,12 +33,10 @@ namespace UsefulUtilities.Utilities;
 
 public class WikiLinks : ToggleableUtility
 {
-    private const string WikiUrl = "https://bloons.fandom.com/wiki/";
+    private const string WikiUrl = "https://www.bloonswiki.com/";
     private const string WikiLinksJSON = "wiki_links.json";
-    private const string CleanWikiPageJS = "clean-wiki-page.js";
 
     private static readonly Dictionary<string, string> WikiLinkTable = new();
-    private static string cleanWikiPageScript = null!;
 
     private static readonly ModSettingBool EmbeddedBrowser = new(false)
     {
@@ -75,10 +74,6 @@ public class WikiLinks : ToggleableUtility
         {
             WikiLinkTable[key] = value?.ToString()!;
         }
-
-        await using var jsStream = mod.MelonAssembly.Assembly.GetEmbeddedResource(CleanWikiPageJS);
-        using var jsReader = new StreamReader(jsStream);
-        cleanWikiPageScript = await jsReader.ReadToEndAsync();
     }
 
     private static void Setup(TextMeshProUGUI text, Func<string> getName, float? lineSpacing = null)
@@ -109,8 +104,6 @@ public class WikiLinks : ToggleableUtility
         }
     }
 
-    private static bool firstTime = true;
-
     private static void OpenLink(string link)
     {
         var fullLink = Path.Combine(WikiUrl, link);
@@ -131,18 +124,8 @@ public class WikiLinks : ToggleableUtility
             .GetType("BTD_Mod_Helper.UI.BTD6.EmbeddedBrowser")!;
         var open = embeddedBrowser.GetMethod("OpenURL", BindingFlags.NonPublic | BindingFlags.Static)!;
 
-        open.Invoke(null, [
-            fullLink, new Action<SteamWebView>(view =>
-            {
-                view.EvaluateJavaScript(cleanWikiPageScript);
-                if (firstTime)
-                {
-                    firstTime = false;
-                    TaskScheduler.ScheduleTask(() => view.Exists()?.Reload(), ScheduleType.WaitForSeconds, 1);
-                }
-            })
-        ]);
-        
+        open.Invoke(null, [fullLink, new Action<SteamWebView>(view => { })]);
+
     }
 
     [HarmonyPatch(typeof(UpgradeScreen), nameof(UpgradeScreen.UpdateUi))]
@@ -200,8 +183,8 @@ public class WikiLinks : ToggleableUtility
 #if DEBUG
 
     private static readonly ModSettingButton GenerateLinks = new(() => Task.Run(GenerateWikiLinks));
-    
-    private static async void GenerateWikiLinks()
+
+    internal static async void GenerateWikiLinks()
     {
         var jobject = new JObject();
 
@@ -209,7 +192,7 @@ public class WikiLinks : ToggleableUtility
 
         foreach (var tower in towers)
         {
-            var name = LocalizationManager.Instance.GetTextEnglish(tower.towerId);
+            var name = LocalizationManager.Instance.GetText(tower.towerId);
 
             var link = await GetWikiLink(name);
 
@@ -224,7 +207,7 @@ public class WikiLinks : ToggleableUtility
 
         foreach (var hero in heroes)
         {
-            var name = LocalizationManager.Instance.GetTextEnglish(hero.towerId);
+            var name = LocalizationManager.Instance.GetText(hero.towerId);
 
             var link = await GetWikiLink(name);
 
@@ -246,8 +229,9 @@ public class WikiLinks : ToggleableUtility
         {
             foreach (var upgrade in upgrades)
             {
-                var name = LocalizationManager.Instance.GetTextEnglish(upgrade);
-                var towerName = LocalizationManager.Instance.GetTextEnglish(tower);
+                var locsKey = Game.instance.model.GetUpgrade(upgrade).LocsKey;
+                var name = LocalizationManager.Instance.GetText(locsKey);
+                var towerName = LocalizationManager.Instance.GetText(tower);
                 var link = await GetWikiLink(name, towerName);
 
                 if (link != null)
@@ -283,17 +267,16 @@ public class WikiLinks : ToggleableUtility
 
     private static bool IsBase(string name) => !ModHelper.Mods.Any(mod => name.StartsWith(mod.IDPrefix));
 
-    private static string NameToLink(string name) =>
-        Regex.Replace(name.Replace(" ", "_"), @"(-[a-z])", m => m.ToString().ToUpper());
+    private static string NameToLink(string name) => name.Replace(" ", "_");
 
     internal static async Task<string?> GetWikiLink(string name, string towerName = "")
     {
         var normalLink = NameToLink(name);
         var btd6Link = normalLink + "_(BTD6)";
         var disambiguatedLink = normalLink + $"_({NameToLink(towerName)})";
-        var disambiguatedBtd6Link = normalLink + $"_(BTD6_{NameToLink(towerName)})";
+        var disambiguatedBtd6Link = normalLink + $"_(BTD6)_({NameToLink(towerName)})";
 
-        foreach (var link in new[] { btd6Link, normalLink, disambiguatedBtd6Link, disambiguatedLink })
+        foreach (var link in new[] {btd6Link, normalLink, disambiguatedBtd6Link, disambiguatedLink})
         {
             if (await TryLink(link)) return link;
         }
@@ -320,3 +303,20 @@ public class WikiLinks : ToggleableUtility
 
 #endif
 }
+
+#if DEBUG
+
+public class WikiLinksCommands : ModCommand<ExportCommand>
+{
+    public override string Command => "wikilinks";
+    public override string Help => "Generates wiki links";
+
+    public override bool Execute(ref string resultText)
+    {
+        Task.Run(WikiLinks.GenerateWikiLinks);
+        resultText = "Generation now in progress";
+        return true;
+    }
+
+}
+#endif
