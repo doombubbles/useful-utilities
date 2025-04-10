@@ -5,6 +5,7 @@ using HarmonyLib;
 using Il2CppAssets.Scripts.Simulation;
 using Il2CppAssets.Scripts.Simulation.Bloons;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
+using UnityEngine;
 namespace UsefulUtilities.Utilities;
 
 public class UnFastForwardOnDanger : ToggleableUtility
@@ -44,7 +45,7 @@ public class UnFastForwardOnDanger : ToggleableUtility
         [HarmonyPostfix]
         internal static void Postfix(Simulation __instance)
         {
-            if (!GetInstance<UnFastForwardOnDanger>().Enabled) return;
+            if (!GetInstance<UnFastForwardOnDanger>().Enabled || Input.GetKey(KeyCode.Space)) return;
             cooldown--;
             if (cooldown > 0) return;
             cooldown = 0;

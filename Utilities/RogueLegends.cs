@@ -187,6 +187,19 @@ public class RogueHotkeys : UsefulUtility
         }
     }
 
+    private static readonly List<Hotkeys.TowerHotkeyInfo> TowerHotkeys = [];
+
+    [HarmonyPatch(typeof(Hotkeys), nameof(Hotkeys.Setup))]
+    internal static class Hotkeys_Setup
+    {
+        [HarmonyPostfix]
+        internal static void Postfix(Hotkeys __instance)
+        {
+            TowerHotkeys.Clear();
+            TowerHotkeys.AddRange(__instance.towerHotkeys.ToArray());
+        }
+    }
+
     [HarmonyPatch(typeof(InGame), nameof(InGame.CheckShortcutKeys))]
     internal static class InGame_CheckShortcutKeys
     {
@@ -195,7 +208,7 @@ public class RogueHotkeys : UsefulUtility
         {
             if (ShopMenu.instance == null || __instance.InputManager.isPlacingTower) return;
 
-            foreach (var towerHotkey in __instance.hotkeys.towerHotkeys.ToArray())
+            foreach (var towerHotkey in TowerHotkeys)
             {
                 if (!__instance.hotkeys.IsHotkeyPressed(towerHotkey.hotkeyButton)) continue;
 
