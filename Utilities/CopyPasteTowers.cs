@@ -49,14 +49,18 @@ public class CopyPasteTowersUtility
 
     public static void Update()
     {
-        if (!InGame.instance || InGame.Bridge == null || InGame.instance.ReviewMapMode || InGame.Bridge.IsSpectatorMode || InGame.instance.GameType == GameType.Rogue) return;
+        if (!InGame.instance ||
+            InGame.Bridge == null ||
+            InGame.instance.ReviewMapMode ||
+            InGame.Bridge.IsSpectatorMode ||
+            InGame.instance.GameType == GameType.Rogue) return;
 
         if (TowerSelectionMenu.instance)
         {
             var selectedTower = TowerSelectionMenu.instance.selectedTower;
             var tower = selectedTower?.Def;
-            if (tower is {isParagon: false, isSubTower: false} &&
-                !tower.IsHero() &&
+            if (tower is {isSubTower: false} &&
+                (ModHelper.HasMod("Unlimited5thTiers") || !tower.IsHero() && !tower.isParagon) &&
                 tower.name.StartsWith(tower.baseId))
             {
                 lastCopyWasCut = CutTower.JustPressed();
@@ -145,7 +149,9 @@ public class CopyPasteTowersUtility
             var discountMult = 0f;
             if (pos != default)
             {
-                discountMult = towerManager.GetDiscountMultiplier(towerManager.GetZoneDiscount(towerModel, pos, upgrade.path, upgrade.tier + 1, owner));
+                discountMult =
+                    towerManager.GetDiscountMultiplier(towerManager.GetZoneDiscount(towerModel, pos, upgrade.path,
+                        upgrade.tier + 1, owner));
             }
 
             total += CostHelper.CostForDifficulty(upgrade.cost, 1 - discountMult);

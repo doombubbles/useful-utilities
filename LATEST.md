@@ -1,4 +1,1 @@
-- Fixed for BTD6 v49
-- Removed the Rogue Legends tower hotkey cycling, as Ninja Kiwi added it themselves
-- Ninja Kiwi added their own version of tower placement snapping in the accessbility options, but Auto Nudge will not
-be removed as it can still be useful for finding a very tiny mearby placement spot
+- If you have the [Unlimited 5th Tiers+ mod](https://github.com/doombubbles/unlimited-5th-tiers#readme) installed, Copy/Paste functionality will now work with Paragons and Heroes

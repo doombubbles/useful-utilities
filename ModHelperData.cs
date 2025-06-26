@@ -2,8 +2,8 @@ namespace UsefulUtilities;
 
 public static class ModHelperData
 {
-    public const string WorksOnVersion = "49.0";
-    public const string Version = "1.3.2";
+    public const string WorksOnVersion = "49.1";
+    public const string Version = "1.3.3";
     public const string Name = "Useful Utilities";
 
     public const string Description =
