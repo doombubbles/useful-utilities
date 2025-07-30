@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using BTD_Mod_Helper;
 using BTD_Mod_Helper.Api.Helpers;
 using BTD_Mod_Helper.Api.ModOptions;
@@ -7,6 +8,7 @@ using HarmonyLib;
 using Il2CppAssets.Scripts;
 using Il2CppAssets.Scripts.Models;
 using Il2CppAssets.Scripts.Models.Towers;
+using Il2CppAssets.Scripts.Models.Towers.Upgrades;
 using Il2CppAssets.Scripts.Simulation;
 using Il2CppAssets.Scripts.Simulation.Towers;
 using Il2CppAssets.Scripts.Simulation.Towers.Behaviors;
@@ -16,6 +18,7 @@ using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
 using Il2CppNinjaKiwi.Common;
 using Il2CppSystem.Collections.Generic;
 using UnityEngine;
+using Math = Il2CppAssets.Scripts.Simulation.SMath.Math;
 using Vector3 = Il2CppAssets.Scripts.Simulation.SMath.Vector3;
 
 #if USEFUL_UTILITIES
@@ -46,6 +49,7 @@ public class CopyPasteTowersUtility
     private static bool justPastedTower;
     private static bool lastCopyWasCut;
     private static TargetType? targetType;
+    private static ParagonTower.InvestmentInfo? lastDegree;
 
     public static void Update()
     {
@@ -98,15 +102,21 @@ public class CopyPasteTowersUtility
 
     private static void Copy(Tower tower)
     {
+        cost = CalculateCost(tower.towerModel);
+
         var inGameModel = InGame.instance.GetGameModel();
         clipboard = inGameModel.GetTowerWithName(tower.towerModel.name);
 
-        cost = CalculateCost(clipboard);
+        foreach (var mod in ModHelper.Mods)
+        {
+            mod.Call("OnTowerCopied", tower);
+        }
 
         var name = LocalizationManager.Instance.GetText(tower.towerModel.name);
         Game.instance.ShowMessage($"Copied {name}\n\nTotal Cost is ${(int) cost}");
 
         targetType = tower.TargetType;
+        lastDegree = tower.towerModel.isParagon ? tower.entity.GetBehavior<ParagonTower>()?.investmentInfo : null;
     }
 
     private static void Paste()
@@ -131,36 +141,55 @@ public class CopyPasteTowersUtility
         }), new ObjectId {data = (uint) InGame.instance.bridge.GetInputId()});
     }
 
-    private static double CalculateCost(TowerModel towerModel, Vector3 pos = default)
+    private static double CalculateCost(TowerModel towerModel) => towerModel.appliedUpgrades.Aggregate(
+        towerModel.cost,
+        (current, appliedUpgrade) =>
+            current + Math.RoundToNearestInt(InGame.instance.GetGameModel().GetUpgrade(appliedUpgrade).cost, 5));
+
+    private static int CalculateCost(Tower tower)
     {
-        var inGameModel = InGame.instance.GetGameModel();
-        var towerManager = InGame.instance.GetTowerManager();
+        var sim = tower.Sim;
+        var inGameModel = sim.model;
+        var tm = sim.towerManager;
+        var ti = sim.GetTowerInventory(tower.PlayerOwnerId);
 
-        var total = 0.0;
+        var totalMult = 0f;
+        var totalChange = 0f;
+        ti.GetTowerDiscount(tower.towerModel, ref totalMult, ref totalChange, false);
 
-        var owner = InGame.instance.bridge.MyPlayerNumber;
+        var areaDiscount = tm.GetAreaDiscount(tower.Position.ToVector2());
+        var towerZoneDiscount = tm.GetZoneDiscount(tower.towerModel, tower.Position, -1, 0, tower.owner);
+        var towerDiscountMult = tm.GetDiscountMultiplier(towerZoneDiscount);
 
-        total += towerModel.cost;
+        var total = Math.RoundToNearestInt(
+            (1 - (areaDiscount + towerDiscountMult + totalMult)) * (tower.towerModel.cost - totalChange), 5);
 
-        foreach (var appliedUpgrade in towerModel.appliedUpgrades)
-        {
-            var upgrade = inGameModel.GetUpgrade(appliedUpgrade);
-
-            var discountMult = 0f;
-            if (pos != default)
-            {
-                discountMult =
-                    towerManager.GetDiscountMultiplier(towerManager.GetZoneDiscount(towerModel, pos, upgrade.path,
-                        upgrade.tier + 1, owner));
-            }
-
-            total += CostHelper.CostForDifficulty(upgrade.cost, 1 - discountMult);
-        }
+        total += CalculateUpgradeCosts(tower);
 
         return total;
     }
 
-    private static double CalculateCost(Tower tower) => CalculateCost(tower.towerModel, tower.Position);
+    private static int CalculateUpgradeCosts(Tower tower) =>
+        tower.towerModel.appliedUpgrades.Sum(u => CalculateCost(tower, tower.Sim.model.GetUpgrade(u)));
+
+    private static int CalculateCost(Tower tower, UpgradeModel upgrade)
+    {
+        var sim = tower.Sim;
+        var tm = sim.towerManager;
+
+        var path = upgrade.path;
+        var tier = upgrade.tier + 1;
+
+        if (tm.GetFreeUpgrade(tower.Position, tower, path, tier)) return 0;
+
+        var areaDiscount = tm.GetAreaDiscount(tower.Position.ToVector2());
+        var upgradeZoneDiscount = tm.GetZoneDiscount(tower.towerModel, tower.Position, path, tier + 1, tower.owner);
+        var upgradeDiscountMult = tm.GetDiscountMultiplier(upgradeZoneDiscount);
+
+        var upgradeMult = sim.GetSimulationBehaviorDiscount(tower, path, tier, areaDiscount + upgradeDiscountMult);
+
+        return Math.RoundToNearestInt(upgrade.cost * (1 - upgradeMult), 5);
+    }
 
     [HarmonyPatch(typeof(Tower), nameof(Tower.OnPlace))]
     private static class Tower_OnPlace
@@ -170,7 +199,7 @@ public class CopyPasteTowersUtility
         {
             if (payForIt <= 0) return;
 
-            __instance.worth = (float) CalculateCost(__instance);
+            __instance.worth = CalculateCost(__instance);
             InGame.instance.AddCash(-__instance.worth + __instance.towerModel.cost);
             payForIt = 0;
             justPastedTower = true;
@@ -185,6 +214,20 @@ public class CopyPasteTowersUtility
             {
                 __instance.SetTargetType(targetType);
             }
+
+            if (__instance.towerModel.isParagon && lastDegree != null)
+            {
+                var paragonTower = __instance.entity.GetBehavior<ParagonTower>();
+                paragonTower.investmentInfo = lastDegree.Value;
+                paragonTower.UpdateDegree();
+                paragonTower.PlayParagonUpgradeSound();
+                paragonTower.Finish();
+            }
+
+            foreach (var mod in ModHelper.Mods)
+            {
+                mod.Call("OnTowerPasted", __instance);
+            }
         }
     }
 
@@ -198,6 +241,10 @@ public class CopyPasteTowersUtility
         internal static void Postfix()
         {
             clipboard = null;
+            foreach (var mod in ModHelper.Mods)
+            {
+                mod.Call("OnClipboardCleared");
+            }
         }
     }
 }

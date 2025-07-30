@@ -43,12 +43,9 @@ public class BetterAutoStartUtility
     {
         if (enabled)
         {
-            toggle.goImage.GetComponent<Image>()
-                .SetSprite(GetSprite("GoBtn")!);
-            toggle.fastForwardOffImage.GetComponent<Image>()
-                .SetSprite(GetSprite("FastForwardBtn")!);
-            toggle.fastForwardOnImage.GetComponent<Image>()
-                .SetSprite(GetSprite("FastForwardGlowBtn")!);
+            toggle.goImage.GetComponent<Image>().SetSprite(GetSprite("GoBtn"));
+            toggle.fastForwardOffImage.GetComponent<Image>().SetSprite(GetSprite("FastForwardBtn"));
+            toggle.fastForwardOnImage.GetComponent<Image>().SetSprite(GetSprite("FastForwardGlowBtn"));
         }
         else
         {

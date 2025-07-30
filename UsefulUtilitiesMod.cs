@@ -4,15 +4,16 @@ using BTD_Mod_Helper;
 using BTD_Mod_Helper.Api.Enums;
 using BTD_Mod_Helper.Api.ModOptions;
 using HarmonyLib;
-using Il2CppAssets.Scripts.Models;
 using MelonLoader;
 using Newtonsoft.Json.Linq;
+using UnityEngine;
 using UsefulUtilities;
+using UsefulUtilities.Utilities.InGameCharts;
 
 [assembly: MelonInfo(typeof(UsefulUtilitiesMod), ModHelperData.Name, ModHelperData.Version, ModHelperData.RepoOwner)]
 [assembly: MelonGame("Ninja Kiwi", "BloonsTD6")]
 [assembly: HarmonyDontPatchAll]
-[assembly: MelonOptionalDependencies("NAudio")]
+[assembly: MelonOptionalDependencies("NAudio", "PathsPlusPlus")]
 
 namespace UsefulUtilities;
 
@@ -25,7 +26,7 @@ public class UsefulUtilitiesMod : BloonsTD6Mod
         icon = VanillaSprites.SandboxBtn,
         order = 2,
     };
-    
+
     public static readonly ModSettingCategory Sandbox = new("Sandbox")
     {
         icon = VanillaSprites.SandboxBtn,
@@ -65,19 +66,18 @@ public class UsefulUtilitiesMod : BloonsTD6Mod
         }
     }
 
-    public override void OnRestart()
+    public override void OnRoundStart()
     {
-        foreach (var usefulUtility in UsefulUtilities.Values)
-        {
-            usefulUtility.OnRestart();
-        }
+        Meters.GetRoundData();
     }
 
-    public override void OnNewGameModel(GameModel gameModel)
+    public override void OnMatchStart()
     {
-        foreach (var usefulUtility in UsefulUtilities.Values)
-        {
-            usefulUtility.OnNewGameModel(gameModel);
-        }
+        Meters.ClearRoundData();
+    }
+
+    public override void OnGameObjectsReset()
+    {
+        Meters.ClearRoundData();
     }
 }

@@ -15,6 +15,9 @@ shop for BTD6 utilities.
 
 ### Brand New Features
 
+- In Game Charts
+  - "Meters" - Damage dealt / Cash Generation meters for your towers
+  - "Bloons" - Shows the Bloons currently inbound for the round, or view other rounds' bloons
 - Jukebox Folder
   - Creates a folder where any .mp3 and .wav file added will be loaded into the Jukebox automatically
 - Quick Sell
@@ -22,7 +25,7 @@ shop for BTD6 utilities.
 - Multi Place
   - Holding Shift can multi place for anything: Towers, Powers, Instas, Geraldo Items
 - UI Transparency
-  - New slider within the acccesibility page that can make UI like the tower select menu partially transparent
+  - New slider within the mod settings page that can make UI like the tower select menu partially transparent
 - Hotkey Display
   - Display the hotkeys for towers in the Shop Menu
 - Wiki Links
@@ -43,9 +46,13 @@ shop for BTD6 utilities.
 - Auto Nudge
   - Press a hotkey while placing a tower to move your mouse to the nearest position where it could be placed
 - Better Auto Start
+  - Right click the Play / Fast Forward button toggle auto start, and it has a new visual indicator
 - Copy/Paste Towers
+  - Ctrl + C to copy towers, Ctrl + V to paste towers (calculates full upgrade costs)
 - Indiscriminate Pets
+  - Use hero pets regardless of hero skin
 - In-Game Hero Switch
+  - Hotkeys to switch which hero you're using if you haven't placed one down yet
 
 ### Other Mod Features Partially Included
 

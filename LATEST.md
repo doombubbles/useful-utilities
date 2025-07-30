@@ -1,1 +1,4 @@
-- If you have the [Unlimited 5th Tiers+ mod](https://github.com/doombubbles/unlimited-5th-tiers#readme) installed, Copy/Paste functionality will now work with Paragons and Heroes
+- Updated wikilinks for Desperados
+- Added two In Game Charts that can be opened from the new Mod Helper start menu in game
+  - "Meters" - Damage dealt / Cash Generation meters for your towers
+  - "Bloons" - Shows the Bloons currently inbound for the round, or view other rounds' bloons

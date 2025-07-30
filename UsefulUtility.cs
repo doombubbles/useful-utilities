@@ -5,9 +5,6 @@ using BTD_Mod_Helper;
 using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Data;
 using BTD_Mod_Helper.Api.ModOptions;
-using Il2CppAssets.Scripts.Models;
-using Il2CppAssets.Scripts.Models.TowerSets;
-using Il2CppAssets.Scripts.Simulation.Input;
 using MelonLoader;
 
 namespace UsefulUtilities;
@@ -68,14 +65,6 @@ public abstract class UsefulUtility : NamedModContent, IModSettings
     }
 
     public virtual void OnUpdate()
-    {
-    }
-
-    public virtual void OnRestart()
-    {
-    }
-
-    public virtual void OnNewGameModel(GameModel gameModel)
     {
     }
 }

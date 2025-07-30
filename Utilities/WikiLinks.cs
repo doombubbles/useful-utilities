@@ -276,7 +276,7 @@ public class WikiLinks : ToggleableUtility
         var disambiguatedLink = normalLink + $"_({NameToLink(towerName)})";
         var disambiguatedBtd6Link = normalLink + $"_(BTD6)_({NameToLink(towerName)})";
 
-        foreach (var link in new[] {btd6Link, normalLink, disambiguatedBtd6Link, disambiguatedLink})
+        foreach (var link in new[] {disambiguatedBtd6Link, disambiguatedLink, btd6Link, normalLink})
         {
             if (await TryLink(link)) return link;
         }

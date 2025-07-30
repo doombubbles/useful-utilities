@@ -105,7 +105,7 @@ public class SacrificeHelperUtility : IModSettings
 
 
     [RegisterTypeInIl2Cpp(false)]
-    public class SacrificeHelperUI : MonoBehaviour
+    public class SacrificeHelperUI(IntPtr ptr) : MonoBehaviour(ptr)
     {
         public const int InfoWidth = 500;
         public const int InfoHeight = 100;
@@ -134,10 +134,6 @@ public class SacrificeHelperUtility : IModSettings
         private ModHelperButton sacrificeToggle = null!;
         private ModHelperPanel extraSacrificeInfo = null!;
         private Il2CppSystem.Collections.Generic.List<ModHelperText> sacrificeTowerSets = null!;
-
-        public SacrificeHelperUI(IntPtr ptr) : base(ptr)
-        {
-        }
 
         public void Initialise(TowerSelectionMenu towerSelectionMenu)
         {
