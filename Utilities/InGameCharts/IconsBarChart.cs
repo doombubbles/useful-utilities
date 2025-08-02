@@ -11,10 +11,7 @@ namespace UsefulUtilities.Utilities.InGameCharts;
 [RegisterTypeInIl2Cpp(false)]
 public class IconsBarChart(IntPtr ptr) : BarChart(ptr)
 {
-
     public override Bar CreateBar() => IconsBar.Create(barHeight);
-
-    public override double BarOrdering(Bar bar) => bar.Cast<IconsBar>().currentSort;
 
     private void LateUpdate()
     {
@@ -24,6 +21,11 @@ public class IconsBarChart(IntPtr ptr) : BarChart(ptr)
         {
             iconsBar.UpdateForScrollPos();
         }
+    }
+
+    [HideFromIl2Cpp]
+    public override void UpdateLayout(BarInfo[] barInfo)
+    {
     }
 
     [HideFromIl2Cpp]

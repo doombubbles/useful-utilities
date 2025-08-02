@@ -9,10 +9,14 @@ using Il2CppAssets.Scripts.Data.Quests;
 using Il2CppAssets.Scripts.Models.ServerEvents;
 using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.Menu;
+using Il2CppAssets.Scripts.Unity.Player;
 using Il2CppAssets.Scripts.Unity.UI_New.Main.HeroSelect;
 using Il2CppAssets.Scripts.Unity.UI_New.Main.Home;
+using Il2CppAssets.Scripts.Unity.UI_New.Main.MapSelect;
 using Il2CppAssets.Scripts.Unity.UI_New.Main.PowersSelect;
 using Il2CppAssets.Scripts.Unity.UI_New.Quests;
+using Il2CppNinjaKiwi.GUTS.Models.ContentBrowser;
+using Il2CppSystem.Linq;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -113,14 +117,14 @@ public class ClearAlerts : ToggleableUtility
                     }
                 }
 
-                if (__instance.transform.parent.name == "CoopAnim")
+                if (__instance.transform.parent.name == "CoopAnim" || __instance.name == "ContestedTerritoryButton")
                 {
                     var nextCtEvent = CtEventExtensions.GetNextAvailableCtEventCached();
                     if (nextCtEvent != null && profile.seenUpcomingCtEventId != nextCtEvent.id)
                     {
                         profile.seenUpcomingCtEventId = nextCtEvent.id;
                         changes = true;
-                        __instance.GetComponentInParent<PipEventChecker>().CheckEvent(null);
+                        __instance.GetComponentInParent<PipEventChecker>()?.CheckEvent(null);
                     }
                 }
 
@@ -194,7 +198,8 @@ public class ClearAlerts : ToggleableUtility
                 {
                     {"TalesTab", QuestCategory.Tale},
                     {"ChallengesTab", QuestCategory.Challenge},
-                    {"TutorialTab", QuestCategory.Tutorial}
+                    {"TutorialTab", QuestCategory.Tutorial},
+                    {"ExperimentsTab", QuestCategory.Experiment}
                 };
 
                 if (questTabs.TryGetValue(__instance.name, out var questCategory))
@@ -217,6 +222,29 @@ public class ClearAlerts : ToggleableUtility
                         {
                             questPanel.newQuestPanel.SetActive(false);
                         }
+                    }
+                }
+
+                if (__instance.GetComponentInParent<PipEventChecker>().Is(out var checker) &&
+                    checker.IsPipVisible &&
+                    checker.name == "CommunityBtn" &&
+                    Game.Player.onlineProfileModel?.contentBrowserData?.TryGetValue(ContentType.Map, out var data) ==
+                    true)
+                {
+
+                    foreach (var id in SkuSettings.instance.GetFeaturedContentIds(ContentType.Map)
+                                 .Cast<Il2CppSystem.Collections.Generic.IEnumerable<string>>().ToArray())
+                    {
+                        if (!data.seenFeaturedIds.Contains(id))
+                        {
+                            data.seenFeaturedIds.Add(id);
+                            changes = true;
+                        }
+                    }
+                    checker.CheckEvent(null);
+                    foreach (var o in __instance.GetComponentInParent<MapSelectScreen>().communityButtonPipObjects)
+                    {
+                        o.SetActive(false);
                     }
                 }
 
@@ -271,6 +299,21 @@ public class ClearAlerts : ToggleableUtility
             {
                 ModHelper.Error<UsefulUtilitiesMod>(e);
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(Btd6Player), nameof(Btd6Player.HasNewBossRushEvent))]
+    internal static class Btd6Player_HasNewBossRushEvent
+    {
+        [HarmonyPrefix]
+        internal static bool Prefix(Btd6Player __instance, ref bool __result)
+        {
+            if (__instance.IsFlagged)
+            {
+                __result = false;
+                return false;
+            }
+            return true;
         }
     }
 }

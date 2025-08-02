@@ -7,7 +7,7 @@ public class CashPerRound : StatType
 {
     public override string DisplayName => "Cash / Round";
 
-    protected override int Order => 3;
+    protected override int Order => 4;
 
     public override string Icon => VanillaSprites.BananaIcon;
 

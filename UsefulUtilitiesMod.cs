@@ -73,11 +73,11 @@ public class UsefulUtilitiesMod : BloonsTD6Mod
 
     public override void OnMatchStart()
     {
-        Meters.ClearRoundData();
+        Meters.ClearData();
     }
 
     public override void OnGameObjectsReset()
     {
-        Meters.ClearRoundData();
+        Meters.ClearData();
     }
 }

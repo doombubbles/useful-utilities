@@ -1,4 +1,4 @@
-- Updated wikilinks for Desperados
-- Added two In Game Charts that can be opened from the new Mod Helper start menu in game
-  - "Meters" - Damage dealt / Cash Generation meters for your towers
-  - "Bloons" - Shows the Bloons currently inbound for the round, or view other rounds' bloons
+- Added a rolling average Damage per Second option to the damage meters
+- Added a compact mode setting to the Bloons chart
+- When the Bloons chart is in live mode, it will automatically start showing the next round's Bloons once the current round's emissions are over
+- Updated the Clear Alerts feature with a couple more alerts

@@ -76,7 +76,7 @@ public abstract class GroupType : NamedModContent
 
         if (t.Def.tiers != null && t.Def.tiers.Sum() > 0)
         {
-            towerName = t.Def.tiers.Join(delimiter: "/") + towerName;
+            towerName = t.Def.tiers.Join(delimiter: "/") + " " + towerName;
         }
 
         return towerName;

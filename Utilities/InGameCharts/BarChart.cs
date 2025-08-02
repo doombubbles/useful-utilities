@@ -21,7 +21,7 @@ public class BarChart(IntPtr ptr) : ModHelperScrollPanel(ptr)
 
     public virtual Bar CreateBar() => Bar.Create(barHeight);
 
-    public virtual double BarOrdering(Bar bar) => bar.currentValue;
+    public virtual double BarOrdering(Bar bar) => bar.currentSort ?? bar.currentValue;
 
     public static BarChart Create(Info info) => Create<BarChart>(info);
 
@@ -30,7 +30,7 @@ public class BarChart(IntPtr ptr) : ModHelperScrollPanel(ptr)
         var barChart = ModHelperScrollPanel.Create<T>(info, RectTransform.Axis.Vertical, null, 2, 1);
 
         var horizontal = barChart.AddHorizontalScrollbar(25, VanillaSprites.SmallSquareWhiteGradient,
-            VanillaSprites.SmallSquareWhiteGradient);
+            VanillaSprites.SmallSquareWhiteGradient, ScrollRect.ScrollbarVisibility.AutoHide);
         InGameCharts.ModifyScrollbar(horizontal);
 
         var vertical = barChart.AddVerticalScrollbar(25, VanillaSprites.SmallSquareWhiteGradient,
@@ -44,15 +44,40 @@ public class BarChart(IntPtr ptr) : ModHelperScrollPanel(ptr)
         barChart.ScrollContent.LayoutGroup.childAlignment = TextAnchor.UpperLeft;
         barChart.ScrollContent.LayoutGroup.childForceExpandWidth = true;
 
-
         return barChart;
     }
 
+    [HideFromIl2Cpp]
+    public virtual void UpdateLayout(BarInfo[] barInfo)
+    {
+        var useGrid = barInfo.All(info => string.IsNullOrEmpty(info.Label) && info.Color is {a: 0});
+
+        if (ScrollContent.LayoutGroup.Is<VerticalLayoutGroup>() && useGrid)
+        {
+            ScrollContent.RemoveComponent<VerticalLayoutGroup>();
+
+            var group = ScrollContent.AddComponent<GridLayoutGroup>();
+            group.cellSize = new Vector2(150, 75);
+            group.spacing = new Vector2(ModHelperWindow.Margin, ModHelperWindow.Margin);
+            group.SetPadding(1);
+        } else if (!ScrollContent.LayoutGroup.Is<VerticalLayoutGroup>() && !useGrid)
+        {
+            ScrollContent.RemoveComponent<GridLayoutGroup>();
+
+            var group = ScrollContent.AddComponent<VerticalLayoutGroup>();
+            group.childAlignment = TextAnchor.UpperLeft;
+            group.childForceExpandWidth = true;
+            group.childForceExpandHeight = false;
+            group.spacing = 2;
+            group.SetPadding(1);
+        }
+    }
 
 
     [HideFromIl2Cpp]
     public void UpdateBarsFromInfo(BarInfo[] barInfos)
     {
+        UpdateLayout(barInfos);
         var existingBars = new Dictionary<string, BarInfo>();
         var newBars = new Dictionary<string, BarInfo>();
 

@@ -11,7 +11,7 @@ using UnityEngine.UI;
 
 namespace UsefulUtilities.Utilities.InGameCharts;
 
-public record struct IconsBarInfo(BarInfo BarInfo, float Sort, float[] Positions);
+public record struct IconsBarInfo(BarInfo BarInfo, float[] Positions);
 
 [RegisterTypeInIl2Cpp(false)]
 public class IconsBar(IntPtr ptr) : Bar(ptr)
@@ -22,8 +22,6 @@ public class IconsBar(IntPtr ptr) : Bar(ptr)
     public int currentTotal;
     public Vector2 lastScrollPos;
     public float lastWidth;
-
-    public float currentSort;
 
     public static new IconsBar Create(int height)
     {
@@ -89,7 +87,6 @@ public class IconsBar(IntPtr ptr) : Bar(ptr)
     public void UpdateFromInfo(IconsBarInfo iconsBarInfo)
     {
         var barInfo = iconsBarInfo.BarInfo;
-        currentSort = iconsBarInfo.Sort;
 
         currentTotal = iconsBarInfo.Positions.Length;
 

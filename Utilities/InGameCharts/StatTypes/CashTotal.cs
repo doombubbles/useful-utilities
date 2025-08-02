@@ -6,7 +6,7 @@ public class CashTotal : StatType
 {
     public override string DisplayName => "Cash Total";
 
-    protected override int Order => 2;
+    protected override int Order => 3;
 
     public override string Icon => VanillaSprites.BananaIcon;
 

@@ -22,7 +22,16 @@ public class InGameCharts : UsefulUtility
     {
         displayName = "Chart Update FPS",
         description = "How many times each second will charts update their displays; will never exceed framerate.",
-        min = 1
+        min = 1,
+        max = 60
+    };
+
+    public static readonly ModSettingInt DPSAverageSeconds = new(3)
+    {
+        displayName = "DPS Average Seconds",
+        description = "Number of real time seconds over which the rolling average for tower dps is calculated",
+        min = 1,
+        max = 15
     };
 
     public static readonly ModSettingBool TowerMeters = new(true)

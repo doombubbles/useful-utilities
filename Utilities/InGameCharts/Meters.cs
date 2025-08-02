@@ -5,7 +5,6 @@ using BTD_Mod_Helper;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Data;
 using BTD_Mod_Helper.Api.Enums;
-using BTD_Mod_Helper.Api.ModOptions;
 using BTD_Mod_Helper.Api.UI;
 using BTD_Mod_Helper.Extensions;
 using Il2CppAssets.Scripts;
@@ -14,6 +13,8 @@ using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppInterop.Runtime.Attributes;
 using Il2CppSystem.IO;
 using MelonLoader;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UsefulUtilities.Utilities.InGameCharts.GroupTypes;
 using UsefulUtilities.Utilities.InGameCharts.StatTypes;
@@ -22,13 +23,21 @@ namespace UsefulUtilities.Utilities.InGameCharts;
 // public record struct MeterSettings(int StatType, int GroupType, bool HideMonkeyNames, bool ShowSubTowers);
 public class Meters : ModWindow, IModSettings
 {
+    [JsonObject(MemberSerialization.OptIn)]
     [RegisterTypeInIl2Cpp(false)]
     public class MetersData(IntPtr pointer) : MonoBehaviour(pointer)
     {
         public BarChart chart = null!;
+        public ModHelperPopdown statDropdown = null!;
+        public ModHelperPopdown groupDropdown = null!;
+
+        [JsonProperty]
         public int statType;
+        [JsonProperty]
         public int groupType;
+        [JsonProperty]
         public bool hideMonkeyNames;
+        [JsonProperty]
         public bool showSubTowers;
 
         [HideFromIl2Cpp]
@@ -45,6 +54,7 @@ public class Meters : ModWindow, IModSettings
 
     public static readonly Dictionary<ObjectId, long> DamageRoundData = new();
     public static readonly Dictionary<ObjectId, float> CashRoundData = new();
+    public static readonly Queue<(int, Dictionary<ObjectId, long>)> DamageTimeData = new();
 
     private static DateTimeOffset lastChartUpdate = DateTimeOffset.Now;
 
@@ -56,6 +66,7 @@ public class Meters : ModWindow, IModSettings
 
         if (lastChartUpdate.AddMilliseconds(1000f / InGameCharts.ChartUpdateFPS) < DateTimeOffset.Now)
         {
+            GetRealTimeData();
             foreach (var window in ActiveWindows)
             {
                 UpdateChartData(window);
@@ -84,6 +95,7 @@ public class Meters : ModWindow, IModSettings
             menuOffset: new Vector2(0, ModHelperWindow.Margin / 2f));
         window.topLeftGroup.Add(statDropdown);
         window.ApplyWindowColor(statDropdown.menu, ModWindowColor.PanelType.Main);
+        metersData.statDropdown = statDropdown;
 
 
         var groups = GetContent<GroupType>();
@@ -96,6 +108,7 @@ public class Meters : ModWindow, IModSettings
             }), Vector2.up, autosize: true, menuOffset: new Vector2(0, ModHelperWindow.Margin / 2f));
         window.topLeftGroup.Add(groupDropdown);
         window.ApplyWindowColor(groupDropdown.menu, ModWindowColor.PanelType.Main);
+        metersData.groupDropdown = groupDropdown;
     }
 
     public override void ModifyOptionsMenu(ModHelperWindow window, ModHelperPopupMenu menu)
@@ -113,10 +126,25 @@ public class Meters : ModWindow, IModSettings
             isSelected: new Func<bool>(() => metersData.showSubTowers));
     }
 
-    public static void ClearRoundData()
+    public static void ClearData()
     {
         CashRoundData.Clear();
         DamageRoundData.Clear();
+        DamageTimeData.Clear();
+    }
+
+    public static void GetRealTimeData()
+    {
+        var towers = InGame.Bridge.Simulation.towerManager.GetTowers().ToArray();
+        var time = InGame.Bridge.Simulation.roundTime.elapsed;
+        var damage = towers.ToDictionary(tower => tower.Id, tower => tower.damageDealt);
+
+        DamageTimeData.Enqueue((time, damage));
+
+        if (DamageTimeData.Count > InGameCharts.ChartUpdateFPS * InGameCharts.DPSAverageSeconds)
+        {
+            DamageTimeData.Dequeue();
+        }
     }
 
     public static void GetRoundData()
@@ -181,6 +209,22 @@ public class Meters : ModWindow, IModSettings
         {
             ModHelper.Warning<UsefulUtilitiesMod>(e);
         }
+    }
 
+    public override bool SaveWindow(ModHelperWindow window, ref JObject saveData)
+    {
+        saveData = JObject.FromObject(window.GetComponent<MetersData>());
+
+        return true;
+    }
+
+    public override void LoadWindow(ModHelperWindow window, JObject saveData)
+    {
+        var data = window.GetComponent<MetersData>();
+        JsonConvert.PopulateObject(saveData.ToString(), data);
+
+        data.statDropdown.dropdown.SetValue(data.statType);
+        data.groupDropdown.dropdown.SetValue(data.groupType);
+        ModHelper.Msg<UsefulUtilitiesMod>("this loaded");
     }
 }

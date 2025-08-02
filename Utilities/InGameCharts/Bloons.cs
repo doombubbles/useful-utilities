@@ -18,6 +18,8 @@ using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppTMPro;
 using MelonLoader;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,15 +27,26 @@ namespace UsefulUtilities.Utilities.InGameCharts;
 
 public class Bloons : ModWindow, IModSettings
 {
+    [JsonObject(MemberSerialization.OptIn)]
     [RegisterTypeInIl2Cpp(false)]
     public class BloonsData(IntPtr pointer) : MonoBehaviour(pointer)
     {
         public IconsBarChart chart = null!;
+        public BarChart compactChart = null!;
+        public ModHelperCheckbox liveCheckbox = null!;
+        public ModHelperInputField roundField = null!;
+
+        [JsonProperty]
         public bool live;
+        [JsonProperty]
         public int round;
-        public int lastRound = -1;
-        public bool lastLive;
+        [JsonProperty]
         public bool hideBloonNames;
+        [JsonProperty]
+        public bool compact;
+
+        public int lastRound = -1;
+        public bool changed;
     }
 
     public override string Icon => VanillaSprites.Red;
@@ -41,6 +54,8 @@ public class Bloons : ModWindow, IModSettings
 
     public override int DefaultWidth => 1000;
     public override int DefaultHeight => 400;
+
+    public override int MinimumWidth => 235;
 
     public static readonly ModSettingFloat TheScale = new(1);
 
@@ -63,17 +78,24 @@ public class Bloons : ModWindow, IModSettings
 
     public override void ModifyWindow(ModHelperWindow window)
     {
-        var bloonsSettings = window.AddComponent<BloonsData>();
+        var bloonsData = window.AddComponent<BloonsData>();
 
-        bloonsSettings.chart = window.content.Add(IconsBarChart.Create(new Info("BarChart", InfoPreset.FillParent)
+        bloonsData.chart = window.content.Add(IconsBarChart.Create(new Info("Chart", InfoPreset.FillParent)
         {
             SizeDelta = new Vector2(-20, -20)
         }));
 
+        bloonsData.compactChart = window.content.Add(BarChart.Create(new Info("CompactChart", InfoPreset.FillParent)
+        {
+            SizeDelta = new Vector2(-20, -20)
+        }));
+        bloonsData.compactChart.SetActive(false);
+
         var liveCheckbox = window.topLeftGroup.AddCheckbox(new Info("Live", 175, window.topBarHeight), true,
             VanillaSprites.SmallSquareWhiteGradient, new Action<bool>(b =>
             {
-                bloonsSettings.live = b;
+                bloonsData.live = b;
+                bloonsData.changed = true;
                 window.GetDescendent<NK_TextMeshProInputField>("Round")?.SetText($"{Spawner.CurrentRound + 1}");
                 UpdateData(window);
             }), ModHelperSprites.Tick);
@@ -93,9 +115,10 @@ public class Bloons : ModWindow, IModSettings
             Pivot = new Vector2(1, 0.5f),
             X = -15
         }, "Live", ModHelperComponent.DefaultFontSize, TextAlignmentOptions.MidlineRight);
+        bloonsData.liveCheckbox = liveCheckbox;
 
 
-        var round = window.topLeftGroup.AddInputField(new Info("Round", 250, window.topBarHeight), "1",
+        var roundField = window.topLeftGroup.AddInputField(new Info("Round", 250, window.topBarHeight), "1",
             VanillaSprites.SmallSquareWhiteGradient, new Action<string>(s =>
             {
                 if (string.IsNullOrEmpty("round"))
@@ -112,80 +135,89 @@ public class Bloons : ModWindow, IModSettings
                     return;
                 }
 
-                bloonsSettings.round = round;
+                bloonsData.round = round;
+                bloonsData.changed = true;
                 UpdateData(window);
             }), ModHelperComponent.DefaultFontSize, TMP_InputField.CharacterValidation.Integer);
-        round.Text.Text.font = Fonts.Btd6FontTitle;
-        round.InputField.UseBackgroundTint();
-        round.InputField.onValidateInput +=
+        roundField.Text.Text.font = Fonts.Btd6FontTitle;
+        roundField.InputField.UseBackgroundTint();
+        roundField.InputField.onValidateInput +=
             new Func<string, int, char, char>((s, i, c) => s.Length >= 3 || !"1234567890".Contains(c) ? '\0' : c);
-        round.Viewport.SetInfo(round.Viewport.initialInfo with
+        roundField.Viewport.SetInfo(roundField.Viewport.initialInfo with
         {
             AnchorX = 1,
             PivotX = 1,
             Width = 100
         });
-        round.InputField.selectionColor = new Color(1, 1, 1, .75f);
-        TaskScheduler.ScheduleTask(() => round.InputField.caretRectTrans.localScale = 1.25f * Vector3.one,
-            () => round.Exists()?.InputField?.caretRectTrans is not null,
-            () => round == null);
+        roundField.InputField.selectionColor = new Color(1, 1, 1, .75f);
+        TaskScheduler.ScheduleTask(() => roundField.InputField.caretRectTrans.localScale = 1.25f * Vector3.one,
+            () => roundField.Exists()?.InputField?.caretRectTrans is not null,
+            () => roundField == null);
+        bloonsData.roundField = roundField;
+        roundField.SetActive(false);
 
-        round.SetActive(false);
-
-        var label = round.AddText(new Info("Label", InfoPreset.FillParent), "Round", ModHelperComponent.DefaultFontSize,
-            TextAlignmentOptions.MidlineLeft);
+        var label = roundField.AddText(new Info("Label", InfoPreset.FillParent), "Round",
+            ModHelperComponent.DefaultFontSize, TextAlignmentOptions.MidlineLeft);
         label.RectTransform.offsetMin = label.RectTransform.offsetMin with
         {
             x = 15
         };
-        round.GetComponent<Mask>().enabled = false;
+        roundField.GetComponent<Mask>().enabled = false;
     }
 
     public override void ModifyOptionsMenu(ModHelperWindow window, ModHelperPopupMenu menu)
     {
-        menu.AddSeparator();
-
         var data = window.GetComponent<BloonsData>();
-        menu.AddOption(new Info("Hide Names"),
-            action: new Action(() =>
-            {
-                data.hideBloonNames = true;
-                UpdateData(window);
-            }),
-            isSelected: new Func<bool>(() => data.hideBloonNames));
+
+        menu.AddSeparator();
+        menu.AddOption(new Info("Compact"), icon: VanillaSprites.SmallBloonModeIcon2, action: new Action(() =>
+        {
+            data.compact = !data.compact;
+            data.changed = true;
+            UpdateData(window);
+        }), isSelected: new Func<bool>(() => data.compact));
+        menu.AddOption(new Info("Hide Names"), icon: VanillaSprites.NamedMonkeyIcon, action: new Action(() =>
+        {
+            data.hideBloonNames = !data.hideBloonNames;
+            data.changed = true;
+            UpdateData(window);
+        }), isSelected: new Func<bool>(() => data.hideBloonNames));
     }
 
     public override void OnUpdate(ModHelperWindow window)
     {
-        var settings = window.GetComponent<BloonsData>();
-        window.GetDescendent<ModHelperInputField>("Round").SetActive(!settings.live);
+        var data = window.GetComponent<BloonsData>();
+        window.GetDescendent<ModHelperInputField>("Round").SetActive(!data.live);
     }
 
     public static void UpdateData(ModHelperWindow window)
     {
-        var chart = window.GetDescendent<IconsBarChart>();
-        var settings = window.GetComponent<BloonsData>();
+        var data = window.GetComponent<BloonsData>();
 
-        IconsBarInfo[] barInfos;
+        data.chart.SetActive(!data.compact);
+        data.compactChart.SetActive(data.compact);
 
         var round = Spawner.CurrentRound;
+        IEnumerable<BloonEmissionModel> emissions;
+        int startTime;
 
         try
         {
-            if (settings.live && Spawner.roundsActive)
+            if (data.live && Spawner.roundsActive && Spawner.roundData.Count > 0)
             {
-                var emissions = Spawner.roundData.Values().SelectMany(data => data.emissions.ToArray());
-                barInfos = InfoFromEmissions(emissions, InGame.Bridge.ElapsedTime, settings.hideBloonNames);
+                emissions = Spawner.roundData.Values().SelectMany(rd => rd.emissions.ToArray());
+                startTime = InGame.Bridge.ElapsedTime;
             }
             else
             {
-                round = settings.live ? round : settings.round - 1;
+                round = data.live ? Spawner.roundsActive ? round + 1 : round : data.round - 1;
 
                 if (round < 0)
                 {
-                    barInfos = [];
+                    emissions = [];
+                    startTime = 0;
                 }
-                else if (round != settings.lastRound || settings.lastLive != settings.live)
+                else if (round != data.lastRound || data.changed)
                 {
                     var baseRoundManager = Spawner.baseRoundManager.Cast<DefaultRoundManager>();
 
@@ -195,9 +227,8 @@ public class Bloons : ModWindow, IModSettings
                                            ? Spawner.freeplayRoundManager
                                            : Spawner.baseRoundManager;
 
-                    var emissions = roundManager.GetRoundEmissions(round);
-
-                    barInfos = InfoFromEmissions(emissions, -100, settings.hideBloonNames);
+                    emissions = roundManager.GetRoundEmissions(round);
+                    startTime = -100;
                 }
                 else
                 {
@@ -205,41 +236,54 @@ public class Bloons : ModWindow, IModSettings
                 }
             }
 
-            chart.UpdateBarsFromInfo(barInfos);
+            if (data.compact)
+            {
+                data.compactChart.UpdateBarsFromInfo(GetInfo(emissions, data.hideBloonNames));
+            }
+            else
+            {
+                data.chart.UpdateBarsFromInfo(GetInfo(emissions, startTime, data.hideBloonNames));
+            }
         }
         finally
         {
-            settings.lastRound = round;
-            settings.lastLive = settings.live;
+            data.lastRound = round;
+            data.changed = false;
         }
-
     }
 
-    public static IconsBarInfo[] InfoFromEmissions(IEnumerable<BloonEmissionModel> emissions, int startTime,
-        bool hideNames) => emissions
-        .GroupBy(emission => emission.bloon)
-        .Select(group =>
-        {
-            var bloon = Game.instance.model.GetBloon(group.Key);
-            return new IconsBarInfo
+
+    public static IconsBarInfo[] GetInfo(IEnumerable<BloonEmissionModel> emissions, int startTime, bool hideNames) =>
+        emissions
+            .GroupBy(emission => emission.bloon)
+            .Select(group => new IconsBarInfo
             {
-                BarInfo = new BarInfo
-                {
-                    Id = bloon.name,
-                    Icon = bloon.icon.AssetGUID,
-                    Label = hideNames ? "" : BloonName(bloon),
-                    Value = group.Count()
-                },
+                BarInfo = GetInfo(group.Key, group.Count(), hideNames),
                 Positions = group
                     .Select(emission => (emission.time - startTime) * TheScale)
                     .ToArray(),
-                Sort = bloon.danger
-            };
-        })
-        .ToArray();
+            })
+            .ToArray();
 
+    public static BarInfo[] GetInfo(IEnumerable<BloonEmissionModel> emissions, bool hideNames) =>
+        emissions
+            .GroupBy(emission => emission.bloon)
+            .Select(group => GetInfo(group.Key, group.Count(), hideNames))
+            .ToArray();
 
-    public override void OnUnMinimized(ModHelperWindow window) => UpdateData(window);
+    public static BarInfo GetInfo(string bloonId, int count, bool hideNames)
+    {
+        var bloon = Game.instance.model.GetBloon(bloonId);
+        return new BarInfo
+        {
+            Id = bloon.name,
+            Icon = bloon.icon.AssetGUID,
+            Label = hideNames ? "" : BloonName(bloon),
+            Color = new Color(0, 0, 0, 0),
+            Sort = bloon.danger,
+            Value = count
+        };
+    }
 
     public static string BloonName(BloonModel bloon) => new[]
     {
@@ -249,4 +293,20 @@ public class Bloons : ModWindow, IModSettings
         bloon.baseId.Localize()
     }.Join(delimiter: " ");
 
+    public override void OnUnMinimized(ModHelperWindow window) => UpdateData(window);
+
+    public override bool SaveWindow(ModHelperWindow window, ref JObject saveData)
+    {
+        saveData = JObject.FromObject(window.GetComponent<BloonsData>());
+        return true;
+    }
+
+    public override void LoadWindow(ModHelperWindow window, JObject saveData)
+    {
+        var data = window.GetComponent<BloonsData>();
+        JsonConvert.PopulateObject(saveData.ToString(), data);
+
+        data.liveCheckbox.SetChecked(data.live);
+        data.roundField.SetText(data.round.ToString());
+    }
 }

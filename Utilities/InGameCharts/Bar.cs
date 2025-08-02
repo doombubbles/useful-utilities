@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEngine.UI;
 namespace UsefulUtilities.Utilities.InGameCharts;
 
-public record struct BarInfo(string Id, double Value, string Label, string? Icon, Color? Color);
+public record struct BarInfo(string Id, double Value, string Label, string? Icon, Color? Color, float? Sort);
 
 [RegisterTypeInIl2Cpp(false)]
 public class Bar(IntPtr ptr) : ModHelperPanel(ptr)
@@ -24,6 +24,7 @@ public class Bar(IntPtr ptr) : ModHelperPanel(ptr)
     private string? lastIcon;
 
     public double currentValue;
+    public float? currentSort;
 
     public int barHeight;
 
@@ -54,11 +55,12 @@ public class Bar(IntPtr ptr) : ModHelperPanel(ptr)
 
         bar.amount = bar.AddText(new Info("Amount")
         {
-            AnchorMin = new Vector2(0.75f, 0),
+            AnchorMin = new Vector2(0, 0),
             AnchorMax = new Vector2(1, 1),
             Pivot = new Vector2(1, 0.5f),
             X = -10
         }, "", 50, TextAlignmentOptions.MidlineRight);
+        bar.amount.Text.EnableAutoSizing(50, 25);
 
         bar.icon = bar.AddImage(new Info("Icon", height)
         {
@@ -99,6 +101,8 @@ public class Bar(IntPtr ptr) : ModHelperPanel(ptr)
             }
             lastIcon = barInfo.Icon;
         }
+
+        currentSort = barInfo.Sort;
     }
 
     public static string FormatValue(double value) => value switch
