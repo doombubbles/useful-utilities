@@ -8,6 +8,7 @@ using MelonLoader;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UsefulUtilities;
+using UsefulUtilities.Utilities;
 using UsefulUtilities.Utilities.InGameCharts;
 
 [assembly: MelonInfo(typeof(UsefulUtilitiesMod), ModHelperData.Name, ModHelperData.Version, ModHelperData.RepoOwner)]

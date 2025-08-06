@@ -47,6 +47,7 @@ public class ClearAlerts : ToggleableUtility
 
                 var profile = Game.Player.Data;
                 var changes = false;
+                var onlineChanges = false;
 
                 if (__instance.transform.parent.name == "PowersAnim")
                 {
@@ -239,6 +240,7 @@ public class ClearAlerts : ToggleableUtility
                         {
                             data.seenFeaturedIds.Add(id);
                             changes = true;
+                            onlineChanges = true;
                         }
                     }
                     checker.CheckEvent(null);
@@ -252,6 +254,10 @@ public class ClearAlerts : ToggleableUtility
                 {
                     MenuManager.instance.buttonClickSound.Play();
                     Game.Player.SaveNow();
+                }
+                if (onlineChanges)
+                {
+                    Game.Player.SyncOnlineProfile();
                 }
             }
             catch (Exception e)
