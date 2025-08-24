@@ -8,6 +8,7 @@ using Il2CppAssets.Scripts.Unity.UI_New.InGame.AbilitiesMenu;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
 using Il2CppTMPro;
 using MelonLoader;
+using System.Drawing;
 using System.Linq;
 using UnityEngine;
 
@@ -15,10 +16,6 @@ namespace UsefulUtilities.Utilities;
 
 public class AbilitySeconds : UsefulUtility
 {
-    public static MelonPreferences_Category Preferences { get; private set; } = null!;
-
-    protected override bool CreateCategory => true;
-
     public static readonly ModSettingDouble TextOpacity = new(1)
     {
         icon = VanillaSprites.EmoteTextSpeechBubble,
@@ -48,6 +45,11 @@ public class AbilitySeconds : UsefulUtility
     {
         icon = VanillaSprites.CooldownClockBg,
         description = "Enable the default cooldown circle.",
+    };
+
+    public static readonly ModSettingBool EnableTrailingS = new(true)
+    {
+        description = "Enable to have \"s\" appended to timers (i.e. 6.9s opposed to 6.9).",
     };
 
 
@@ -107,14 +109,9 @@ public class AbilitySeconds : UsefulUtility
             textPanel = abilityGameObject.AddModHelperPanel(
                 new("AbilitySecondsTextPanel", 0, 0, rectTransform.rect.width, rectTransform.rect.height));
 
-            // Fade the background
-            var image = textPanel.GetComponent<UnityEngine.UI.Image>();
-
-            textPanel.AddComponent<CanvasGroup>().blocksRaycasts = false;
-
             // Add the text element
             var newText = textPanel.AddText(
-                new("AbilitySecondsText", 0, 0, rectTransform.rect.width, rectTransform.rect.height - 30),
+                new("AbilitySecondsText", 0, 0, rectTransform.rect.width + 25, rectTransform.rect.height - 30),
                 text: "",
                 fontSize: 68f,
                 align: TextAlignmentOptions.Bottom);
@@ -140,7 +137,7 @@ public class AbilitySeconds : UsefulUtility
             text.Text.color = new Color(1f, 1f, 1f, TextOpacity);
         }
 
-        string s = string.Format("{0:F" + DecimalPlaces.GetValue() + "}", cooldown);
+        string s = $"{string.Format("{0:F" + DecimalPlaces.GetValue() + "}", cooldown)}{(EnableTrailingS ? "s" : "")}";
         text.SetText(s);
     }
 }
