@@ -1,10 +1,1 @@
-- More In Game Charts features
-  - Added a rolling average Damage per Second option to the damage meters
-  - Added a compact mode setting to the Bloons chart
-  - When the Bloons chart is in live mode, it will automatically start showing the next round's Bloons once the current round's emissions are over
-- Updated the Clear Alerts feature with a couple more alerts
-- Added a button within the Map Select Screen to show Boss Challenge Badges collected per map
-  - Bronze Border if at least 1 Non-Elite Boss is defeated
-  - Silver Border if all Non-Elite Bosses are defeated
-  - Gold Border if at least 1 Elite Boss is defeated
-  - Black Border if all Elite Bosses are defeated
+- Added a setting Three Column Shop that makes the in game towers shop list be 3 columns instead of 2

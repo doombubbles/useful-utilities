@@ -60,7 +60,7 @@ public class HotkeyDisplay : ToggleableUtility
             text.Text.color = new Color(1, 1, 1, TextOpacity);
         }
 
-        if (string.IsNullOrWhiteSpace(hotkey.path))
+        if (string.IsNullOrWhiteSpace(hotkey.path) || hotkey.path.Contains("None"))
         {
             text.SetActive(false);
             return;

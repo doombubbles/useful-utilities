@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BTD_Mod_Helper;
+using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Data;
 using BTD_Mod_Helper.Api.Enums;
@@ -225,6 +226,5 @@ public class Meters : ModWindow, IModSettings
 
         data.statDropdown.dropdown.SetValue(data.statType);
         data.groupDropdown.dropdown.SetValue(data.groupType);
-        ModHelper.Msg<UsefulUtilitiesMod>("this loaded");
     }
 }

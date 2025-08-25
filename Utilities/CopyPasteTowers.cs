@@ -102,7 +102,7 @@ public class CopyPasteTowersUtility
 
     private static void Copy(Tower tower)
     {
-        cost = CalculateCost(tower.towerModel);
+        cost = CalculateBaseCost(tower);
 
         var inGameModel = InGame.instance.GetGameModel();
         clipboard = inGameModel.GetTowerWithName(tower.towerModel.name);
@@ -141,15 +141,19 @@ public class CopyPasteTowersUtility
         }), new ObjectId {data = (uint) InGame.instance.bridge.GetInputId()});
     }
 
-    private static double CalculateCost(TowerModel towerModel) => towerModel.appliedUpgrades.Aggregate(
-        towerModel.cost,
-        (current, appliedUpgrade) =>
-            current + Math.RoundToNearestInt(InGame.instance.GetGameModel().GetUpgrade(appliedUpgrade).cost, 5));
+    private static int ModifyClipboardCost(Tower tower) =>
+        ModHelper.Mods.Aggregate(0, (i, mod) => i + Convert.ToInt32(mod.Call("ModifyClipboardCost", tower) ?? 0));
+
+    private static int BaseUpgradeCost(string name) =>
+        Math.RoundToNearestInt(InGame.instance.GetGameModel().GetUpgrade(name).cost, 5);
+
+    private static double CalculateBaseCost(Tower tower) =>
+        tower.towerModel.appliedUpgrades.Aggregate(tower.towerModel.cost, (i, upgrade) => i + BaseUpgradeCost(upgrade))
+        + ModifyClipboardCost(tower);
 
     private static int CalculateCost(Tower tower)
     {
         var sim = tower.Sim;
-        var inGameModel = sim.model;
         var tm = sim.towerManager;
         var ti = sim.GetTowerInventory(tower.PlayerOwnerId);
 
@@ -165,6 +169,8 @@ public class CopyPasteTowersUtility
             (1 - (areaDiscount + towerDiscountMult + totalMult)) * (tower.towerModel.cost - totalChange), 5);
 
         total += CalculateUpgradeCosts(tower);
+
+        total += ModifyClipboardCost(tower);
 
         return total;
     }
@@ -199,6 +205,11 @@ public class CopyPasteTowersUtility
         {
             if (payForIt <= 0) return;
 
+            foreach (var mod in ModHelper.Mods)
+            {
+                mod.Call("OnTowerPasted", __instance);
+            }
+
             __instance.worth = CalculateCost(__instance);
             InGame.instance.AddCash(-__instance.worth + __instance.towerModel.cost);
             payForIt = 0;
@@ -222,11 +233,6 @@ public class CopyPasteTowersUtility
                 paragonTower.UpdateDegree();
                 paragonTower.PlayParagonUpgradeSound();
                 paragonTower.Finish();
-            }
-
-            foreach (var mod in ModHelper.Mods)
-            {
-                mod.Call("OnTowerPasted", __instance);
             }
         }
     }
