@@ -1,1 +1,2 @@
+- @oatsfx added a setting for Ability Seconds, making ability buttons display their cooldowns as text rather than just the circle (configurable in settings) 
 - Added a setting Three Column Shop that makes the in game towers shop list be 3 columns instead of 2

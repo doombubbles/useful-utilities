@@ -57,8 +57,6 @@ public class Bloons : ModWindow, IModSettings
 
     public override int MinimumWidth => 235;
 
-    public static readonly ModSettingFloat TheScale = new(1);
-
     public static Spawner Spawner => InGame.Bridge.Simulation.Map.spawner;
 
     public static DateTimeOffset lastChartUpdate = DateTimeOffset.Now;
@@ -260,7 +258,7 @@ public class Bloons : ModWindow, IModSettings
             {
                 BarInfo = GetInfo(group.Key, group.Count(), hideNames),
                 Positions = group
-                    .Select(emission => (emission.time - startTime) * TheScale)
+                    .Select(emission => emission.time - startTime)
                     .ToArray(),
             })
             .ToArray();

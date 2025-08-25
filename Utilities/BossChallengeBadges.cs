@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
 using BTD_Mod_Helper.Extensions;
@@ -14,6 +15,7 @@ using Il2CppSystem;
 using UnityEngine;
 using Action = System.Action;
 using Enum = System.Enum;
+
 namespace UsefulUtilities.Utilities;
 
 public class BossChallengeBadges : ToggleableUtility
@@ -24,6 +26,8 @@ public class BossChallengeBadges : ToggleableUtility
 
     public override string Description =>
         "Shows a button in the map selection screen for showing Boss Challenge completions";
+
+    protected override string Icon => GetTextureGUID("Boss");
 
     [HarmonyPatch(typeof(MapSelectScreen), nameof(MapSelectScreen.Open))]
     internal static class MapSelectScreen_Open
