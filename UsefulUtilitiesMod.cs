@@ -6,9 +6,7 @@ using BTD_Mod_Helper.Api.ModOptions;
 using HarmonyLib;
 using MelonLoader;
 using Newtonsoft.Json.Linq;
-using UnityEngine;
 using UsefulUtilities;
-using UsefulUtilities.Utilities;
 using UsefulUtilities.Utilities.InGameCharts;
 
 [assembly: MelonInfo(typeof(UsefulUtilitiesMod), ModHelperData.Name, ModHelperData.Version, ModHelperData.RepoOwner)]
@@ -80,5 +78,13 @@ public class UsefulUtilitiesMod : BloonsTD6Mod
     public override void OnGameObjectsReset()
     {
         Meters.ClearData();
+    }
+
+    public override void OnTitleScreen()
+    {
+        foreach (var usefulUtility in UsefulUtilities.Values)
+        {
+            usefulUtility.OnTitleScreen();
+        }
     }
 }

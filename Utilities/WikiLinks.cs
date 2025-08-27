@@ -307,7 +307,7 @@ public class WikiLinks : ToggleableUtility
 
 #if DEBUG
 
-public class WikiLinksCommands : ModCommand<ExportCommand>
+public class WikiLinksCommands : ModCommand<GenerateCommand>
 {
     public override string Command => "wikilinks";
     public override string Help => "Generates wiki links";

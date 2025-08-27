@@ -67,4 +67,8 @@ public abstract class UsefulUtility : NamedModContent, IModSettings
     public virtual void OnUpdate()
     {
     }
+
+    public virtual void OnTitleScreen()
+    {
+    }
 }

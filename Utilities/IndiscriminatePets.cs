@@ -28,6 +28,9 @@ public class IndiscriminatePetsUtility
     private static bool IsEnabled => GetInstance<IndiscriminatePets>().Enabled;
 
     public override void OnSaveSettings() => ModifyItems();
+
+    public override void OnTitleScreen() => ModifyItems();
+
 #else
     private const bool IsEnabled = true;
 #endif

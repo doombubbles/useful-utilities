@@ -20,7 +20,13 @@ public class KeepDefaultUpgradeSounds : ToggleableUtility
 
     public override string Description => "Makes Trophy Store upgrade effects not apply their sound changes.";
 
-    public override void OnSaveSettings()
+    private static bool IsEnabled => GetInstance<KeepDefaultUpgradeSounds>().Enabled;
+
+    public override void OnSaveSettings() => ModifyItems();
+
+    public override void OnTitleScreen() => ModifyItems();
+
+    public static void ModifyItems()
     {
         var trophyStoreItems = GameData.Instance.trophyStoreItems;
 
@@ -33,9 +39,7 @@ public class KeepDefaultUpgradeSounds : ToggleableUtility
         {
             AudioSwaps.TryAdd(assetChange.id, assetChange.audioSwaps);
 
-            assetChange.audioSwaps = Enabled
-                ? new List<AudioSwap>()
-                : AudioSwaps[assetChange.id];
+            assetChange.audioSwaps = IsEnabled ? new List<AudioSwap>() : AudioSwaps[assetChange.id];
         }
     }
 }

@@ -25,7 +25,6 @@ using MelonLoader;
 using UnityEngine;
 using static BTD_Mod_Helper.Api.Enums.VanillaSprites;
 
-
 #if USEFUL_UTILITIES
 namespace UsefulUtilities.Utilities;
 #else
@@ -33,8 +32,6 @@ namespace SacrificeHelper;
 #endif
 
 #if USEFUL_UTILITIES
-using BTD_Mod_Helper.Api.Data;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 public class SacrificeHelper : UsefulUtility
 #else
@@ -314,20 +311,24 @@ public class SacrificeHelperUtility : IModSettings
 
         static ParagonDetail()
         {
-            AllDetails = new List<ParagonDetail>
-            {
+            AllDetails =
+            [
                 new("Money Spent", VanillaSprites.CoinIcon, info => info.powerFromMoneySpent,
                     model => model.maxPowerFromMoneySpent),
+
                 new("Pops / Generated Cash", VanillaSprites.PopIcon, info => info.powerFromPops,
                     model => model.maxPowerFromPops),
+
                 new("Non Tier 5 Upgrades Purchased", VanillaSprites.UpgradeContainerGrey,
                     info => info.powerFromNonTier5Tiers, model => model.maxPowerFromNonTier5Count,
                     image => image.AddText(new Info("Text", InfoPreset.FillParent), "<5", 69)),
+
                 new("Having Tier 5 Towers", VanillaSprites.UpgradeContainerTier5, info => info.powerFromTier5Count,
                     model => model.maxPowerFromTier5Count,
                     image => image.AddText(new Info("Text", InfoPreset.FillParent), "5", 69)),
+
                 new("Geraldo Totems", VanillaSprites.ParagonPowerTotem, info => info.powerFromBonus)
-            };
+            ];
         }
 
         public string Name { get; }
@@ -428,13 +429,10 @@ public class SacrificeHelperUtility : IModSettings
             {
                 var worst = "";
                 var min = float.MaxValue;
-                foreach (var key in worths.Keys)
+                foreach (var key in worths.Keys.Where(key => worths[key] < min))
                 {
-                    if (worths[key] < min)
-                    {
-                        worst = key;
-                        min = worths[key];
-                    }
+                    worst = key;
+                    min = worths[key];
                 }
 
                 ret[worst] = Color.red;
@@ -501,9 +499,9 @@ public class SacrificeHelperUtility : IModSettings
         {
             var gameModel = InGame.instance != null ? InGame.Bridge.Model : Game.instance.model;
 
-            return tower.towerModel.tier == 6
-                       ? gameModel.GetParagonUpgradeForTowerId(tower.towerModel.baseId)
-                       : gameModel.GetUpgrade("Paragonomics_" + tower.towerModel.name);
+            return tower.IsMutatedBy("HonoraryParagon")
+                       ? gameModel.GetUpgrade("HonoraryParagon_" + tower.towerModel.name)
+                       : gameModel.GetParagonUpgradeForTowerId(tower.towerModel.baseId);
         }
 
         public static long GetParagonDegree(TowerToSimulation tower, out ParagonTower.InvestmentInfo investmentInfo,

@@ -1,4 +1,3 @@
-- Fixed for BTD6 v50
-- @oatsfx added a setting for Ability Seconds, making ability buttons display their cooldowns as text rather than just the circle (configurable in settings) 
-- Three Column Shop (default false): Makes the in game list of towers in the shop have 3 columns instead of 2. 
-- Sandbox Round End (default true): Allows round end triggers to still function in Sandbox mode
+More v50 changes
+- Indiscriminate Pets and Keep Default Upgrade Sounds back working
+- Fixed a Sacrifice Helper interaction
