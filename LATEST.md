@@ -1,2 +1,4 @@
+- Fixed for BTD6 v50
 - @oatsfx added a setting for Ability Seconds, making ability buttons display their cooldowns as text rather than just the circle (configurable in settings) 
-- Added a setting Three Column Shop that makes the in game towers shop list be 3 columns instead of 2
+- Three Column Shop (default false): Makes the in game list of towers in the shop have 3 columns instead of 2. 
+- Sandbox Round End (default true): Allows round end triggers to still function in Sandbox mode

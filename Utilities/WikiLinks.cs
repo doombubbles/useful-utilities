@@ -221,6 +221,7 @@ public class WikiLinks : ToggleableUtility
         var upgradesByTower = towers.ToDictionary(
             model => model.towerId,
             model => Game.instance.model.GetTowersWithBaseId(model.towerId)
+                .AsIEnumerable()
                 .SelectMany(towerModel => towerModel.appliedUpgrades)
                 .Distinct()
         );

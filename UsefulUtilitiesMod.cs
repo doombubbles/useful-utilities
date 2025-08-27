@@ -24,7 +24,7 @@ public class UsefulUtilitiesMod : BloonsTD6Mod
 
     public static readonly ModSettingCategory Jukebox = new("Jukebox")
     {
-        icon = VanillaSprites.SandboxBtn,
+        icon = VanillaSprites.JukeboxIcon,
         order = 2,
     };
 

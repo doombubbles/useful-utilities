@@ -117,6 +117,7 @@ public class AbilitySeconds : UsefulUtility
                 text: "",
                 fontSize: 68f,
                 align: TextAlignmentOptions.Bottom);
+            newText.Text.fontStyle |= FontStyles.SmallCaps;
 
             newText.transform.SetParent(textPanel.transform);
         }

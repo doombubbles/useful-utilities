@@ -10,8 +10,10 @@ using HarmonyLib;
 using Il2Cpp;
 using Il2CppAssets.Scripts.Data.ParagonData;
 using Il2CppAssets.Scripts.Models.Towers.Behaviors;
+using Il2CppAssets.Scripts.Models.Towers.Upgrades;
 using Il2CppAssets.Scripts.Simulation.Towers;
 using Il2CppAssets.Scripts.Simulation.Towers.Behaviors;
+using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.Bridge;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
@@ -495,6 +497,15 @@ public class SacrificeHelperUtility : IModSettings
             activeAt = -1
         };
 
+        public static UpgradeModel GetParagonUpgrade(Tower tower)
+        {
+            var gameModel = InGame.instance != null ? InGame.Bridge.Model : Game.instance.model;
+
+            return tower.towerModel.tier == 6
+                       ? gameModel.GetParagonUpgradeForTowerId(tower.towerModel.baseId)
+                       : gameModel.GetUpgrade("Paragonomics_" + tower.towerModel.name);
+        }
+
         public static long GetParagonDegree(TowerToSimulation tower, out ParagonTower.InvestmentInfo investmentInfo,
             float bonus = 0)
         {
@@ -502,15 +513,14 @@ public class SacrificeHelperUtility : IModSettings
             var degreeDataModel = gameModel.paragonDegreeDataModel;
 
             var paragonCost = tower.IsParagon
-                ? gameModel.GetParagonUpgradeForTowerId(tower.Def.baseId).cost
-                : tower.GetUpgradeCost(0, 6, -1, true);
+                                  ? GetParagonUpgrade(tower.tower).cost
+                                  : tower.GetUpgradeCost(0, 6, -1, true);
+
             var powerFromMoneySpent = bonus * degreeDataModel.moneySpentOverX /
                                       ((1 + degreeDataModel.paidContributionPenalty) * paragonCost);
-
             var bonusInvestment = new ParagonTower.InvestmentInfo
             {
-                powerFromMoneySpent = bonus * degreeDataModel.moneySpentOverX /
-                                      ((1 + degreeDataModel.paidContributionPenalty) * paragonCost)
+                powerFromMoneySpent = powerFromMoneySpent
             };
 
             if (tower.tower.entity.GetBehavior<ParagonTower>().Is(out var paragonTower))
@@ -527,8 +537,10 @@ public class SacrificeHelperUtility : IModSettings
 
                 var index = 0;
                 investmentInfo = InGame.instance.GetAllTowerToSim()
-                    .Where(tts =>
-                        tts.Def.baseId == tower.Def.baseId || tts.Def.GetChild<ParagonSacrificeBonusModel>() != null)
+                    .Where(tts => !tts.IsParagon &&
+                                  !tts.tower.IsMutatedBy("DoorGunnerMutator") &&
+                                  (tts.Def.baseId == tower.Def.baseId ||
+                                   tts.Def.GetChild<ParagonSacrificeBonusModel>() != null))
                     .OrderBy(tts => paragonTower.GetTowerInvestment(tts.tower).totalInvestment)
                     .Select(tts => paragonTower.GetTowerInvestment(tts.tower, tts.Def.tier >= 5 ? index++ : 3))
                     .Aggregate(bonusInvestment, paragonTower.CombineInvestments);
@@ -565,7 +577,8 @@ public class SacrificeHelperUtility : IModSettings
         {
             var tower = TowerSelectionMenu.instance.selectedTower;
             var bonus = current;
-            var upgradeCost = InGame.Bridge.Model.GetParagonUpgradeForTowerId(tower.Def.baseId).cost;
+            var upgradeCost = Utils.GetParagonUpgrade(tower.tower).cost;
+
             if (__instance.upgradeCost != 0 && InGame.Bridge.GetCash() < upgradeCost)
             {
                 // Handle Paragonomics negative degree
@@ -596,7 +609,7 @@ public class SacrificeHelperUtility : IModSettings
         {
             var tower = TowerSelectionMenu.instance.selectedTower;
             var bonus = 0;
-            var upgradeCost = InGame.Bridge.Model.GetParagonUpgradeForTowerId(tower.Def.baseId).cost;
+            var upgradeCost = Utils.GetParagonUpgrade(tower.tower).cost;
             if (__instance.upgradeCost != 0 && InGame.Bridge.GetCash() < upgradeCost)
             {
                 // Handle Paragonomics negative degree
