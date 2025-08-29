@@ -100,7 +100,7 @@ public class AbilitySeconds : UsefulUtility
             return;
         }
 
-        var cooldown = ability.CooldownRemaining;
+        var cooldown = ability.CooldownRemaining / (1 + ability.model.CooldownSpeedScale);
 
         ModHelperPanel textPanel;
 
