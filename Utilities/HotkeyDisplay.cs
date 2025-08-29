@@ -38,9 +38,9 @@ public class HotkeyDisplay : ToggleableUtility
 
     protected override string Icon => VanillaSprites.HotkeysIcon;
 
-    private static void UpdateHotkeyDisplay(TowerPurchaseButton button, HotkeyButton hotkeyButton)
+    private static void UpdateHotkeyDisplay(TowerPurchaseButton button, HotkeyButton? hotkeyButton)
     {
-        if (button == null) return;
+        if (hotkeyButton == null || button == null) return;
 
         var hotkey = hotkeyButton.hotkey;
         var gameObject = button.gameObject;
@@ -71,19 +71,69 @@ public class HotkeyDisplay : ToggleableUtility
         text.SetActive(true);
 
         var modifier = hotkey.modifierKey == HotkeyModifier.None
-            ? ""
-            : ShortenModifiers
-                ? hotkey.modifierKey switch
-                {
-                    HotkeyModifier.Ctrl => "^",
-                    HotkeyModifier.Shift => "+",
-                    HotkeyModifier.Alt => "!",
-                    _ => ""
-                }
-                : hotkey.modifierKey + "+";
+                           ? ""
+                           : ShortenModifiers
+                               ? hotkey.modifierKey switch
+                               {
+                                   HotkeyModifier.Ctrl => "^",
+                                   HotkeyModifier.Shift => "+",
+                                   HotkeyModifier.Alt => "!",
+                                   _ => ""
+                               }
+                               : hotkey.modifierKey + "+";
 
-        text.SetText(modifier + key.ToUpper());
+        text.SetText(modifier + HotkeyToText(key));
     }
+
+    private static string HotkeyToText(string key) => key.ToUpper() switch
+    {
+        "BACKQUOTE" => "`",
+        "MINUS" => "-",
+        "EQUALS" => "=",
+        "BACKSLASH" => "\\",
+        "LEFTBRACKET" => "[",
+        "RIGHTBRACKET" => "]",
+        "SEMICOLON" => ";",
+        "QUOTE" => "'",
+        "COMMA" => ",",
+        "PERIOD" => ".",
+        "SLASH" => "/",
+
+        "ALPHA0" => "0",
+        "ALPHA1" => "1",
+        "ALPHA2" => "2",
+        "ALPHA3" => "3",
+        "ALPHA4" => "4",
+        "ALPHA5" => "5",
+        "ALPHA6" => "6",
+        "ALPHA7" => "7",
+        "ALPHA8" => "8",
+        "ALPHA9" => "9",
+
+        "KEYPAD0" => "0",
+        "KEYPAD1" => "1",
+        "KEYPAD2" => "2",
+        "KEYPAD3" => "3",
+        "KEYPAD4" => "4",
+        "KEYPAD5" => "5",
+        "KEYPAD6" => "6",
+        "KEYPAD7" => "7",
+        "KEYPAD8" => "8",
+        "KEYPAD9" => "9",
+        "KEYPADPERIOD" => ".",
+        "KEYPADDIVIDE" => "/",
+        "KEYPADMULTIPLY" => "*",
+        "KEYPADMINUS" => "-",
+        "KEYPADPLUS" => "+",
+        "KEYPADENTER" => "ENTER",
+        "KEYPADEQUALS" => "=",
+
+        "SPACE" => "SPACE",
+        "RETURN" => "ENTER",
+
+        _ => key
+    };
+
 
     [HarmonyPatch(typeof(Hotkeys), nameof(Hotkeys.Setup))]
     internal static class Hotkeys_Setup
