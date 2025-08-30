@@ -1,3 +1,3 @@
-More v50 changes
-- Indiscriminate Pets and Keep Default Upgrade Sounds back working
-- Fixed a Sacrifice Helper interaction
+- Made the Ability Seconds displayed number account for ability cooldown speed scale modifiers
+- Fixed some errors with hotkey display for towers with no hotkeys
+- Shortened the text for some specific keys in the hotkey display
