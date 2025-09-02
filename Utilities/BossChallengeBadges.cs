@@ -194,8 +194,8 @@ public class BossChallengeBadges : ToggleableUtility
         }
     }
 
-    [HarmonyPatch(typeof(MainMenu), nameof(MainMenu.Start))]
-    internal static class MainMenu_Start
+    [HarmonyPatch(typeof(MainMenu), nameof(MainMenu.Awake))]
+    internal static class MainMenu_Awake
     {
         [HarmonyPostfix]
         internal static void Postfix()

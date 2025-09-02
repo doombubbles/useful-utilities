@@ -1,3 +1,1 @@
-- Made the Ability Seconds displayed number account for ability cooldown speed scale modifiers
-- Fixed some errors with hotkey display for towers with no hotkeys
-- Shortened the text for some specific keys in the hotkey display
+- Fixes for BTD6 v50.1
