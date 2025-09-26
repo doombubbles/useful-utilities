@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq;
 using BTD_Mod_Helper;
-using BTD_Mod_Helper.Api.Helpers;
 using BTD_Mod_Helper.Api.ModOptions;
 using BTD_Mod_Helper.Extensions;
 using HarmonyLib;
 using Il2CppAssets.Scripts;
 using Il2CppAssets.Scripts.Models;
+using Il2CppAssets.Scripts.Models.Powers;
 using Il2CppAssets.Scripts.Models.Towers;
 using Il2CppAssets.Scripts.Models.Towers.Upgrades;
 using Il2CppAssets.Scripts.Simulation;
@@ -16,10 +16,8 @@ using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
 using Il2CppNinjaKiwi.Common;
-using Il2CppSystem.Collections.Generic;
 using UnityEngine;
 using Math = Il2CppAssets.Scripts.Simulation.SMath.Math;
-using Vector3 = Il2CppAssets.Scripts.Simulation.SMath.Vector3;
 
 #if USEFUL_UTILITIES
 namespace UsefulUtilities.Utilities;
@@ -50,6 +48,7 @@ public class CopyPasteTowersUtility
     private static bool lastCopyWasCut;
     private static TargetType? targetType;
     private static ParagonTower.InvestmentInfo? lastDegree;
+    private static bool overrideNonPower;
 
     public static void Update()
     {
@@ -132,10 +131,12 @@ public class CopyPasteTowersUtility
             try
             {
                 payForIt = 30;
+                overrideNonPower = clipboard.isPowerProTower;
                 inputManager.CreatePlacementTower(pos);
             }
             catch (Exception e)
             {
+                overrideNonPower = false;
                 MelonLogger.Error(e);
             }
         }), new ObjectId {data = (uint) InGame.instance.bridge.GetInputId()});
@@ -203,6 +204,7 @@ public class CopyPasteTowersUtility
         [HarmonyPrefix]
         private static void Prefix(Tower __instance)
         {
+            overrideNonPower = false;
             if (payForIt <= 0) return;
 
             foreach (var mod in ModHelper.Mods)
@@ -236,6 +238,38 @@ public class CopyPasteTowersUtility
             }
         }
     }
+
+    private static TowerModel? lastCheckedPower;
+
+    [HarmonyPatch(typeof(TowerModel), nameof(TowerModel.isPowerTower), MethodType.Getter)]
+    internal static class TowerModel_isPowerTower
+    {
+        [HarmonyPostfix]
+        internal static void Postfix(TowerModel __instance)
+        {
+            if (overrideNonPower)
+            {
+                lastCheckedPower = __instance;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(GameModel), nameof(GameModel.GetPowerWithId))]
+    internal static class GameModel_GetPowerWithId
+    {
+        [HarmonyPostfix]
+        internal static void Postfix(ref PowerModel __result)
+        {
+            if (overrideNonPower && lastCheckedPower != null)
+            {
+                __result = __result.Duplicate();
+                __result.tower = lastCheckedPower;
+                overrideNonPower = false;
+                lastCheckedPower = null;
+            }
+        }
+    }
+
 
     /// <summary>
     /// Clear clipboard on Match Start, Restart, Continue, Exit

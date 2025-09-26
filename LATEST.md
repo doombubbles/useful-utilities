@@ -1,1 +1,2 @@
-- Fixes for BTD6 v50.1
+- Fixed sandbox clear projectiles button
+- Fixed some issues with Copy/Pasting Powers Pro from Powers in Shop

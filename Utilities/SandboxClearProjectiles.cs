@@ -36,6 +36,8 @@ public class SandboxClearProjectiles : ToggleableUtility
             matchLocalPosition.offset = new Vector3(0, 213, 0);
 
             clearProjectiles.onClick.SetListener(() => InGame.Bridge.DestroyAllProjectiles());
+
+            clearProjectiles.gameObject.SetActive(true);
         }
     }
 }
