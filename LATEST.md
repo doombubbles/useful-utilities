@@ -1,2 +1,2 @@
-- Fixed sandbox clear projectiles button
-- Fixed some issues with Copy/Pasting Powers Pro from Powers in Shop
+- Added a patch that fixes the Banana Farmer Pro's middle path tower link not saving properly. 
+  - This should be fixed with BTD6 v51 next month and then this patch will be removed
