@@ -19,7 +19,7 @@ public class HideFriendScores : ToggleableUtility
         [HarmonyPostfix]
         internal static void Postfix(MapButton __instance)
         {
-            if (GetInstance<HideFriendScores>().Enabled)
+            if (GetInstance<HideFriendScores>().Enabled && __instance.friendPanel != null)
             {
                 __instance.friendPanel.gameObject.SetActiveRecursively(false);
             }

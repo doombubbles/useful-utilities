@@ -38,11 +38,13 @@ public class WikiLinks : ToggleableUtility
 
     private static readonly Dictionary<string, string> WikiLinkTable = new();
 
-    private static readonly ModSettingBool EmbeddedBrowser = new(false)
+    /*private static readonly ModSettingBool EmbeddedBrowser = new(false)
     {
         description = "Open links in embedded BTD6 browser rather than the external browser",
         icon = VanillaSprites.GwendolinFirefoxPetIcon
     };
+    */
+    private const bool EmbeddedBrowser = false;
 
     private static readonly ModSettingBool UnderlineLinks = new(true)
     {
@@ -124,8 +126,7 @@ public class WikiLinks : ToggleableUtility
             .GetType("BTD_Mod_Helper.UI.BTD6.EmbeddedBrowser")!;
         var open = embeddedBrowser.GetMethod("OpenURL", BindingFlags.NonPublic | BindingFlags.Static)!;
 
-        open.Invoke(null, [fullLink, new Action<SteamWebView>(view => { })]);
-
+        // open.Invoke(null, [fullLink, new Action<SteamWebView>(view => { })]);
     }
 
     [HarmonyPatch(typeof(UpgradeScreen), nameof(UpgradeScreen.UpdateUi))]

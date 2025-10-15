@@ -43,7 +43,7 @@ public class CopyPasteTowersUtility
 
     private static TowerModel? clipboard;
     private static double cost;
-    private static int payForIt;
+    private static bool payForIt;
     private static bool justPastedTower;
     private static bool lastCopyWasCut;
     private static TargetType? targetType;
@@ -96,7 +96,6 @@ public class CopyPasteTowersUtility
         }
 
         justPastedTower = false;
-        if (--payForIt < 0) payForIt = 0;
     }
 
     private static void Copy(Tower tower)
@@ -130,7 +129,7 @@ public class CopyPasteTowersUtility
         {
             try
             {
-                payForIt = 30;
+                payForIt = true;
                 overrideNonPower = clipboard.isPowerProTower;
                 inputManager.CreatePlacementTower(pos);
             }
@@ -205,7 +204,8 @@ public class CopyPasteTowersUtility
         private static void Prefix(Tower __instance)
         {
             overrideNonPower = false;
-            if (payForIt <= 0) return;
+            if (!payForIt) return;
+            payForIt = false;
 
             foreach (var mod in ModHelper.Mods)
             {
@@ -214,7 +214,6 @@ public class CopyPasteTowersUtility
 
             __instance.worth = CalculateCost(__instance);
             InGame.instance.AddCash(-__instance.worth + __instance.towerModel.cost);
-            payForIt = 0;
             justPastedTower = true;
 
             if (lastCopyWasCut)

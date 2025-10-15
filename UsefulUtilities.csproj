@@ -5,7 +5,7 @@
         <Configurations>Debug;Release;ReleaseLite</Configurations>
         <Nullable>enable</Nullable>
         <AssemblyName>UsefulUtilities</AssemblyName>
-        <LangVersion>latest</LangVersion>
+        <LangVersion>preview</LangVersion>
         <Optimize>false</Optimize>
         <DebugType>embedded</DebugType>
         <DefineConstants>USEFUL_UTILITIES</DefineConstants>

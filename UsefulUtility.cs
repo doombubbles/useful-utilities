@@ -71,4 +71,8 @@ public abstract class UsefulUtility : NamedModContent, IModSettings
     public virtual void OnTitleScreen()
     {
     }
+
+    public virtual void OnMainMenu()
+    {
+    }
 }

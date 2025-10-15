@@ -87,4 +87,12 @@ public class UsefulUtilitiesMod : BloonsTD6Mod
             usefulUtility.OnTitleScreen();
         }
     }
+
+    public override void OnMainMenu()
+    {
+        foreach (var usefulUtility in UsefulUtilities.Values)
+        {
+            usefulUtility.OnMainMenu();
+        }
+    }
 }

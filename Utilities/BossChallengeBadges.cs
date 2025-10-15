@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
 using BTD_Mod_Helper.Extensions;
@@ -9,7 +8,7 @@ using Il2CppAssets.Scripts.Data.Boss;
 using Il2CppAssets.Scripts.Models.ServerEvents;
 using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.Menu;
-using Il2CppAssets.Scripts.Unity.UI_New.Main;
+using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.Main.MapSelect;
 using Il2CppSystem;
 using UnityEngine;
@@ -29,17 +28,23 @@ public class BossChallengeBadges : ToggleableUtility
 
     protected override string Icon => GetTextureGUID("Boss");
 
+    public override void OnMainMenu()
+    {
+        Active = false;
+    }
+
     [HarmonyPatch(typeof(MapSelectScreen), nameof(MapSelectScreen.Open))]
     internal static class MapSelectScreen_Open
     {
         [HarmonyPostfix]
-        internal static void Postfix(MapSelectScreen __instance)
+        internal static void Postfix(MapSelectScreen __instance, Il2CppSystem.Object? data)
         {
-            if (!GetInstance<BossChallengeBadges>().Enabled) return;
+            if (!GetInstance<BossChallengeBadges>().Enabled || data?.Unbox<bool>() == true) return;
 
-            var button = ModHelperButton.Create(new Info("BossChallenges", 180), VanillaSprites.BlueBtnSquare,
-                new Action(() =>
+            var button = ModHelperButton.Create(new Info(nameof(BossChallengeBadges), 180),
+                VanillaSprites.BlueBtnSquare, new Action(() =>
                 {
+                    SinglePlayerCoop.Active = false;
                     Active = !Active;
                     __instance.mapSelectTransition.UpdateMaps();
                     MenuManager.instance.buttonClick3Sound.Play("ClickSounds");
@@ -71,7 +76,7 @@ public class BossChallengeBadges : ToggleableUtility
             __instance.medals.SetActive(!Active);
             bossBadges?.gameObject.SetActive(Active);
 
-            if (!Active) return;
+            if (!Active || InGameData.Editable.selectedCoopMode) return;
 
             var bosses = Enum.GetValues<BossType>();
             var bossChallenges = Game.Player.Data.bossChallengeScores ?? new();
@@ -191,16 +196,6 @@ public class BossChallengeBadges : ToggleableUtility
 
             MenuManager.instance.OpenMenu(SceneNames.BossEventUI, new Tuple<BossEvent?, bool>(null, false));
             return false;
-        }
-    }
-
-    [HarmonyPatch(typeof(MainMenu), nameof(MainMenu.Awake))]
-    internal static class MainMenu_Awake
-    {
-        [HarmonyPostfix]
-        internal static void Postfix()
-        {
-            Active = false;
         }
     }
 }
