@@ -1,2 +1,2 @@
-- Fixes for BTD6 v51
-- Expanded the Single Player Co Op feature with a new button in the Map Select menu akin to the Boss Challenge Badges feature
+- To fix an issue with the Rounds Viewer window interacting with freeplay spawns, you can no longer view the Bloons in freeplay rounds until freeplay has begun within the match
+- Added Previous and Next arrows for the Rounds Viewer window

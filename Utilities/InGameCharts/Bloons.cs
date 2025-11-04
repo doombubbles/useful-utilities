@@ -115,8 +115,10 @@ public class Bloons : ModWindow, IModSettings
         }, "Live", ModHelperComponent.DefaultFontSize, TextAlignmentOptions.MidlineRight);
         bloonsData.liveCheckbox = liveCheckbox;
 
+        var setRoundSection = window.topLeftGroup.AddPanel(
+            new Info("SetRoundSection", 250 + window.topBarHeight * 2, window.topBarHeight));
 
-        var roundField = window.topLeftGroup.AddInputField(new Info("Round", 250, window.topBarHeight), "1",
+        var roundField = setRoundSection.AddInputField(new Info("Round", -50, 0, 250, window.topBarHeight), "1",
             VanillaSprites.SmallSquareWhiteGradient, new Action<string>(s =>
             {
                 if (string.IsNullOrEmpty("round"))
@@ -152,7 +154,6 @@ public class Bloons : ModWindow, IModSettings
             () => roundField.Exists()?.InputField?.caretRectTrans is not null,
             () => roundField == null);
         bloonsData.roundField = roundField;
-        roundField.SetActive(false);
 
         var label = roundField.AddText(new Info("Label", InfoPreset.FillParent), "Round",
             ModHelperComponent.DefaultFontSize, TextAlignmentOptions.MidlineLeft);
@@ -161,6 +162,29 @@ public class Bloons : ModWindow, IModSettings
             x = 15
         };
         roundField.GetComponent<Mask>().enabled = false;
+
+        var roundPrev = setRoundSection.AddButton(new Info("RoundPrev", 100, 0, window.topBarHeight),
+            VanillaSprites.SmallSquareWhiteGradient, new Action(() =>
+            {
+                bloonsData.round--;
+                if (bloonsData.round < 1) bloonsData.round = 1;
+                bloonsData.changed = true;
+                roundField.SetText(bloonsData.round.ToString());
+            }));
+        roundPrev.Button.UseBackgroundTint();
+        roundPrev.AddImage(new Info("Icon", InfoPreset.FillParent), VanillaSprites.PrevArrowSmall);
+
+        var roundNext = setRoundSection.AddButton(new Info("RoundNext", 150, 0, window.topBarHeight),
+            VanillaSprites.SmallSquareWhiteGradient, new Action(() =>
+            {
+                bloonsData.round++;
+                bloonsData.changed = true;
+                roundField.SetText(bloonsData.round.ToString());
+            }));
+        roundNext.Button.UseBackgroundTint();
+        roundNext.AddImage(new Info("Icon", InfoPreset.FillParent), VanillaSprites.NextArrowSmall);
+
+        setRoundSection.SetActive(false);
     }
 
     public override void ModifyOptionsMenu(ModHelperWindow window, ModHelperPopupMenu menu)
@@ -182,12 +206,6 @@ public class Bloons : ModWindow, IModSettings
         }), isSelected: new Func<bool>(() => data.hideBloonNames));
     }
 
-    public override void OnUpdate(ModHelperWindow window)
-    {
-        var data = window.GetComponent<BloonsData>();
-        window.GetDescendent<ModHelperInputField>("Round").SetActive(!data.live);
-    }
-
     public static void UpdateData(ModHelperWindow window)
     {
         var data = window.GetComponent<BloonsData>();
@@ -198,6 +216,11 @@ public class Bloons : ModWindow, IModSettings
         var round = Spawner.CurrentRound;
         IEnumerable<BloonEmissionModel> emissions;
         int startTime;
+
+        if (data.changed)
+        {
+            window.GetDescendent<ModHelperPanel>("SetRoundSection")?.SetActive(!data.live);
+        }
 
         try
         {
@@ -217,15 +240,15 @@ public class Bloons : ModWindow, IModSettings
                 }
                 else if (round != data.lastRound || data.changed)
                 {
-                    var baseRoundManager = Spawner.baseRoundManager.Cast<DefaultRoundManager>();
+                    if (Spawner.roundManager.GetMaxRound() != -1 && round >= Spawner.roundManager.GetMaxRound())
+                    {
+                        emissions = [];
+                    }
+                    else
+                    {
+                        emissions = Spawner.roundManager.GetRoundEmissions(round);
+                    }
 
-                    Spawner.freeplayRoundManager ??= new FreeplayRoundManager(baseRoundManager.model);
-
-                    var roundManager = round >= baseRoundManager.GetMaxRound()
-                                           ? Spawner.freeplayRoundManager
-                                           : Spawner.baseRoundManager;
-
-                    emissions = roundManager.GetRoundEmissions(round);
                     startTime = -100;
                 }
                 else
