@@ -10,7 +10,7 @@ public static class ModHelperData
         """
         Adds an assortment of minor utilities to BTD6.
 
-        New: Jukebox Folder, Quick Sell, Multi Place, UI Transparency, Hotkey Display, Wiki Links, Clear Alerts, Full Screen Hotkey, Tower Selection Hotkeys, Cursor Size Hotkeys, Keep Default Upgrade Sounds
+        New: In Game Charts: Damage Meters and Bloons Round Display, Ability Cooldown Seconds Display, Rogue Legends Hotkeys, Jukebox Folder, Quick Sell, Multi Place, UI Transparency, Hotkey Display, Wiki Links, Clear Alerts, Full Screen Hotkey, Tower Selection Hotkeys, Cursor Size Hotkeys, Keep Default Upgrade Sounds
         Plus: Auto Nudge, Better Auto Start, Copy/Paste Towers, Indiscriminate Pets, In-Game Hero Switch, Sacrfice Helper, Sandbox VTSG/Paragons.
         From Helpful Additions: Sandbox Clear Projectiles Button, Showing Blons in Challenge Editor, Single Player Co-Op
         """;
