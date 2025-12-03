@@ -9,6 +9,7 @@ using BTD_Mod_Helper.Api.Internal;
 using BTD_Mod_Helper.Api.ModOptions;
 using Il2CppNinjaKiwi.Common;
 using MelonLoader.Utils;
+using NAudio.Vorbis;
 using NAudio.Wave;
 using UnityEngine;
 using TaskScheduler = BTD_Mod_Helper.Api.TaskScheduler;
@@ -74,7 +75,7 @@ public class JukeboxFolder : UsefulUtility
     public override void OnRegister()
     {
         if (!Directory.Exists(FolderPath)) Directory.CreateDirectory(FolderPath);
-        
+
         watcher = new FileSystemWatcher(FolderPath);
         watcher.Filters.Add("*.mp3");
         watcher.Filters.Add("*.wav");
@@ -82,7 +83,7 @@ public class JukeboxFolder : UsefulUtility
         watcher.Created += (_, args) => TaskScheduler.ScheduleTask(() => TaskRun(() => LoadTrack(args.FullPath)),
             ScheduleType.WaitForSeconds, 1);
         watcher.EnableRaisingEvents = true;
-        
+
         TaskRun(() => LoadAllTracks(FolderPath));
     }
 
@@ -110,25 +111,15 @@ public class JukeboxFolder : UsefulUtility
         var extension = Path.GetExtension(filePath);
         try
         {
-            AudioClip? audioClip = null;
-
-            switch (extension)
+            using WaveStream waveStream = extension switch
             {
-                case ".mp3":
-                    using (var mp3Reader = new Mp3FileReader(filePath))
-                    {
-                        audioClip = ResourceHandler.CreateAudioClip(mp3Reader, id);
-                    }
+                "wav" => new WaveFileReader(filePath),
+                "mp3" => new Mp3FileReader(filePath),
+                "ogg" => new VorbisWaveReader(filePath),
+                _ => throw new Exception("Unknown audio format")
+            };
 
-                    break;
-                case ".wav":
-                    using (var wavReader = new WaveFileReader(filePath))
-                    {
-                        audioClip = ResourceHandler.CreateAudioClip(wavReader, id);
-                    }
-
-                    break;
-            }
+            var audioClip = ResourceHandler.CreateAudioClip(waveStream, id);
 
             if (audioClip is null) return;
 

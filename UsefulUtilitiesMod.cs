@@ -1,3 +1,4 @@
+global using BTD_Mod_Helper.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using BTD_Mod_Helper;
@@ -42,7 +43,7 @@ public class UsefulUtilitiesMod : BloonsTD6Mod
 
     public override void OnApplicationStart()
     {
-        Preferences = MelonPreferences.CreateCategory("UsefulUtilitiesPreferences");
+        Preferences = MelonPreferences.CreateCategory("5a1367fa308893747a4294d7d7958802");
 
         AccessTools.GetTypesFromAssembly(MelonAssembly.Assembly)
             .Where(type => !type.IsNested)

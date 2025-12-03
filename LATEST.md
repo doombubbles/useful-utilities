@@ -1,2 +1,1 @@
-- To fix an issue with the Rounds Viewer window interacting with freeplay spawns, you can no longer view the Bloons in freeplay rounds until freeplay has begun within the match
-- Added Previous and Next arrows for the Rounds Viewer window
+- Fixed for v52

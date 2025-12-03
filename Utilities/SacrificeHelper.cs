@@ -90,7 +90,7 @@ public class SacrificeHelperUtility : IModSettings
         [HarmonyPostfix]
         private static void Postfix(MenuThemeManager __instance, BaseTSMTheme newTheme)
         {
-            if (!__instance.selectionMenu.Is(out TowerSelectionMenu menu)) return;
+            if (!__instance.PlayerContext.towerSelectionMenu.Is(out var menu)) return;
 
             var ui = newTheme.GetComponent<SacrificeHelperUI>();
             if (ui == null)
@@ -500,8 +500,8 @@ public class SacrificeHelperUtility : IModSettings
             var gameModel = InGame.instance != null ? InGame.Bridge.Model : Game.instance.model;
 
             return tower.IsMutatedBy("HonoraryParagon")
-                       ? gameModel.GetUpgrade("HonoraryParagon_" + tower.towerModel.name)
-                       : gameModel.GetParagonUpgradeForTowerId(tower.towerModel.baseId);
+                ? gameModel.GetUpgrade("HonoraryParagon_" + tower.towerModel.name)
+                : gameModel.GetParagonUpgradeForTowerId(tower.towerModel.baseId);
         }
 
         public static long GetParagonDegree(TowerToSimulation tower, out ParagonTower.InvestmentInfo investmentInfo,
@@ -511,8 +511,8 @@ public class SacrificeHelperUtility : IModSettings
             var degreeDataModel = gameModel.paragonDegreeDataModel;
 
             var paragonCost = tower.IsParagon
-                                  ? GetParagonUpgrade(tower.tower).cost
-                                  : tower.GetUpgradeCost(0, 6, -1, true);
+                ? GetParagonUpgrade(tower.tower).cost
+                : tower.GetUpgradeCost(0, 6, -1, true);
 
             var powerFromMoneySpent = bonus * degreeDataModel.moneySpentOverX /
                                       ((1 + degreeDataModel.paidContributionPenalty) * paragonCost);

@@ -1,5 +1,6 @@
 ﻿using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.ModOptions;
+using BTD_Mod_Helper.Extensions;
 using Il2Cpp;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppGeom;
