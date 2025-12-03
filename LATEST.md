@@ -1,1 +1,1 @@
-- Fixed for v52
+- Fixed a typo causing jukebox errors

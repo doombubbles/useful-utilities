@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
 using BTD_Mod_Helper;
-using BTD_Mod_Helper.Api.ModOptions;
-using BTD_Mod_Helper.Extensions;
 using HarmonyLib;
 using Il2CppAssets.Scripts;
 using Il2CppAssets.Scripts.Models;
@@ -20,9 +18,13 @@ using UnityEngine;
 using Math = Il2CppAssets.Scripts.Simulation.SMath.Math;
 
 #if USEFUL_UTILITIES
+using BTD_Mod_Helper.Api.ModOptions;
+
 namespace UsefulUtilities.Utilities;
 #else
+using BTD_Mod_Helper.Extensions;
 using static CopyPasteTowers.CopyPasteTowersMod;
+
 namespace CopyPasteTowers;
 #endif
 
@@ -62,7 +64,7 @@ public class CopyPasteTowersUtility
         {
             var selectedTower = TowerSelectionMenu.instance.selectedTower;
             var tower = selectedTower?.Def;
-            if (tower is {isSubTower: false} &&
+            if (tower is { isSubTower: false } &&
                 (ModHelper.HasMod("Unlimited5thTiers") || !tower.IsHero() && !tower.isParagon) &&
                 tower.name.StartsWith(tower.baseId))
             {
@@ -138,7 +140,7 @@ public class CopyPasteTowersUtility
                 overrideNonPower = false;
                 MelonLogger.Error(e);
             }
-        }), new ObjectId {data = (uint) InGame.instance.bridge.GetInputId()});
+        }), new ObjectId { data = (uint) InGame.instance.bridge.GetInputId() });
     }
 
     private static int ModifyClipboardCost(Tower tower) =>

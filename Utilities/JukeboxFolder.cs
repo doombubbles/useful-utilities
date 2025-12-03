@@ -113,9 +113,9 @@ public class JukeboxFolder : UsefulUtility
         {
             using WaveStream waveStream = extension switch
             {
-                "wav" => new WaveFileReader(filePath),
-                "mp3" => new Mp3FileReader(filePath),
-                "ogg" => new VorbisWaveReader(filePath),
+                ".wav" => new WaveFileReader(filePath),
+                ".mp3" => new Mp3FileReader(filePath),
+                ".ogg" => new VorbisWaveReader(filePath),
                 _ => throw new Exception("Unknown audio format")
             };
 
