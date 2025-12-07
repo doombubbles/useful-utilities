@@ -22,6 +22,10 @@ shop for BTD6 utilities.
   - Creates a folder where any .mp3 and .wav file added will be loaded into the Jukebox automatically
 - Quick Sell
   - If you're holding down the Sell hotkey, selecting a tower will immediately sell it
+  - Additionally, when you do click the Sell button in the Tower Selection Menu UI, using modifier keys will make it sell other others of that type
+    - Shift: Sell others of the same exact crosspath
+    - Control: Sell others of the same tier
+    - Alt: Sell others of the same tier or less
 - Multi Place
   - Holding Shift can multi place for anything: Towers, Powers, Instas, Geraldo Items
 - UI Transparency
@@ -31,15 +35,15 @@ shop for BTD6 utilities.
 - Wiki Links
   - Turns names of Towers/Heroes/Upgrades in certain places of the UI into links that will show you their wiki page when clicked
 - Clear Alerts
-    - Right click on Powers / Instas / Hero buttons throughout the UI to clear the red info alerts for them
+  - Right click on Powers / Instas / Hero buttons throughout the UI to clear the red info alerts for them
 - Full Screen Hotkey
   - Hotkey to toggle Full Screen mode. Will remember your preferred screen resolution for each mode
 - Tower Selection Hotkeys
   - Hotkeys for cycling through which tower you have selected
 - Cursor Size Hotkeys
-    - Hotkeys for changing the Cursor Size
+  - Hotkeys for changing the Cursor Size
 - Keep Default Upgrade Sounds
-    - For if you want to use the Firework Upgrade effect while maintaining your sanity
+  - For if you want to use the Firework Upgrade effect while maintaining your sanity
 
 ### Other Mod Features Fully Included
 
@@ -57,9 +61,9 @@ shop for BTD6 utilities.
 ### Other Mod Features Partially Included
 
 - Temple and Paragon Sacrifice UI from Sacrifice Helper
-    - Use the full mod for sacrifice effect customization
+  - Use the full mod for sacrifice effect customization
 - VTSG being usable in Sandbox from Unlimited 5th Tiers +
-    - Use the full mod for multiple 5th tiers, VTSGs, etc
+  - Use the full mod for multiple 5th tiers, VTSGs, etc
 
 If any of these other mods is used at the same time, Useful Utilities will defer to their implementations and not clash with
 them.

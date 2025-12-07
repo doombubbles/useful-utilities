@@ -1,5 +1,5 @@
-﻿using BTD_Mod_Helper.Api.Enums;
-using BTD_Mod_Helper.Extensions;
+﻿using System.Linq;
+using BTD_Mod_Helper.Api.Enums;
 using HarmonyLib;
 using Il2CppAssets.Scripts.Unity.Bridge;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
@@ -14,9 +14,12 @@ public class QuickSell : ToggleableUtility
     public override string Description =>
         """
         If you hold down the Sell Tower hotkey, you will sell towers as you select them.
-        If you hold Ctrl+Shift while selling, you will sell all towers of the exact same type and tiers.
-        If you also hold Alt, it will include all towers of that type that are that tier or lower.
+        Additionally, when you do click the Sell button in the Tower Selection Menu UI, using modifier keys will make it sell other others of that type
+        Shift: Sell others of the same exact crosspath
+        Control: Sell others of the same tier
+        Alt: Sell others of the same tier or less
         """;
+
     protected override string Icon => VanillaSprites.MoneyBag;
 
     [HarmonyPatch(typeof(TowerSelectionMenu), nameof(TowerSelectionMenu.SelectTower))]
@@ -35,46 +38,34 @@ public class QuickSell : ToggleableUtility
         }
     }
 
-
-    /// <summary>
-    /// TODO make this work bc of hotkey stuff
-    ///
-    /// </summary>
     [HarmonyPatch(typeof(InGame), nameof(InGame.SellTower))]
     internal static class InGame_SellTower
     {
-        private static bool active;
-
-        [HarmonyPostfix]
-        internal static void Postfix(InGame __instance, TowerToSimulation tower)
+        [HarmonyPrefix]
+        internal static void Prefix(InGame __instance, TowerToSimulation tower)
         {
-            if (active || !((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) &&
-                            (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))) return;
+            var shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            var ctrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            var alt = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+            if (!(shift || ctrl || alt)) return;
 
-            active = true;
-
-            try
+            foreach (var t in __instance.bridge.Simulation.towerManager.GetTowersByBaseId(tower.Def.baseId)
+                         .ToList().Where(t => t.Id != tower.Id))
             {
-                foreach (var t in __instance.bridge.Simulation.towerManager.GetTowersByBaseId(tower.Def.baseId)
-                             .ToList())
+                if (alt)
                 {
-                    if (t.Id == tower.Id) continue;
-
-                    if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
-                    {
-                        if (t.towerModel.tier > tower.Def.tier) continue;
-                    }
-                    else
-                    {
-                        if (!t.towerModel.CheckTiers(tower.Def.tiers, true, false)) continue;
-                    }
-
-                    __instance.SellTower(tower);
+                    if (t.towerModel.tier > tower.Def.tier) continue;
                 }
-            }
-            finally
-            {
-                active = false;
+                else if (ctrl)
+                {
+                    if (t.towerModel.tier != tower.Def.tier) continue;
+                }
+                else if (shift)
+                {
+                    if (!t.towerModel.CheckTiers(tower.Def.tiers, true, false)) continue;
+                }
+
+                __instance.bridge.simulation.SellTower(t, tower.owner);
             }
         }
     }

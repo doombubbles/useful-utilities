@@ -1,1 +1,1 @@
-- Fixed a typo causing jukebox errors
+- Fixed the modifer key functionality for Quick Selling many of the same tower
