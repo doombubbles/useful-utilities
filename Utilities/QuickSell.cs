@@ -10,6 +10,8 @@ namespace UsefulUtilities.Utilities;
 
 public class QuickSell : ToggleableUtility
 {
+    public static bool blockQuickSell;
+
     protected override bool DefaultEnabled => true;
     public override string Description =>
         """
@@ -44,6 +46,8 @@ public class QuickSell : ToggleableUtility
         [HarmonyPrefix]
         internal static void Prefix(InGame __instance, TowerToSimulation tower)
         {
+            if (blockQuickSell) return;
+
             var shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
             var ctrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             var alt = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);

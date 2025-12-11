@@ -5,9 +5,11 @@ using BTD_Mod_Helper;
 using BTD_Mod_Helper.Api.Enums;
 using BTD_Mod_Helper.Api.ModOptions;
 using HarmonyLib;
+using Il2CppAssets.Scripts.Simulation.Towers;
 using MelonLoader;
 using Newtonsoft.Json.Linq;
 using UsefulUtilities;
+using UsefulUtilities.Utilities;
 using UsefulUtilities.Utilities.InGameCharts;
 
 [assembly: MelonInfo(typeof(UsefulUtilitiesMod), ModHelperData.Name, ModHelperData.Version, ModHelperData.RepoOwner)]
@@ -79,6 +81,7 @@ public class UsefulUtilitiesMod : BloonsTD6Mod
     public override void OnGameObjectsReset()
     {
         Meters.ClearData();
+        UpgradeQueueing.QueuedUpgrades.Clear();
     }
 
     public override void OnTitleScreen()
