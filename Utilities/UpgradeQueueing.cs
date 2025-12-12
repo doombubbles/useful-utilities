@@ -17,12 +17,13 @@ using Il2CppNinjaKiwi.Common;
 using MelonLoader;
 using UnityEngine;
 using UnityEngine.UI;
-using TaskScheduler = BTD_Mod_Helper.Api.TaskScheduler;
 
 namespace UsefulUtilities.Utilities;
 
 public class UpgradeQueueing : ToggleableUtility
 {
+    protected override int Order => -1;
+
     protected override bool DefaultEnabled => true;
 
     public override string Description =>
@@ -32,16 +33,22 @@ public class UpgradeQueueing : ToggleableUtility
     public record QueuedUpgrade(ObjectId TowerId, int Path, int Tier, string UpgradeId);
     public static readonly List<QueuedUpgrade> QueuedUpgrades = [];
 
+    private static BloonsMod? PathsPlusPlus => field ??= ModHelper.GetMod(nameof(PathsPlusPlus));
+
     public static void EnqueueUpgrade(QueuedUpgrade queuedUpgrade)
     {
+#if DEBUG
         ModHelper.Msg<UsefulUtilitiesMod>($"Queuing upgrade {queuedUpgrade.UpgradeId.Localize()}");
+#endif
         QueuedUpgrades.Add(queuedUpgrade);
         OnQueueChanged();
     }
 
     public static void DequeueUpgrade(QueuedUpgrade queuedUpgrade)
     {
+#if DEBUG
         ModHelper.Msg<UsefulUtilitiesMod>($"Canceling queued upgrade {queuedUpgrade.UpgradeId.Localize()}");
+#endif
 
         QueuedUpgrades.Remove(queuedUpgrade);
         QueuedUpgrades.RemoveAll(upgrade =>
@@ -61,6 +68,18 @@ public class UpgradeQueueing : ToggleableUtility
             {
                 upgradeObject.UpdateVisuals(upgradeObject.path, false);
             }
+        }
+    }
+
+    public static void PruneQueue()
+    {
+        var towerManager = InGame.Bridge.Simulation.towerManager;
+        var removed = QueuedUpgrades.RemoveAll(upgrade =>
+            towerManager.GetTowerById(upgrade.TowerId) is not { IsDestroyed: false } tower ||
+            Tiers(tower)[upgrade.Path] >= upgrade.Tier);
+        if (removed > 0)
+        {
+            OnQueueChanged();
         }
     }
 
@@ -87,10 +106,6 @@ public class UpgradeQueueing : ToggleableUtility
 
         var towerManager = InGame.Bridge.Simulation.towerManager;
 
-        QueuedUpgrades.RemoveAll(upgrade =>
-            towerManager.GetTowerById(upgrade.TowerId) is not { IsDestroyed: false } tower ||
-            tower.towerModel.tiers[upgrade.Path] >= upgrade.Tier); // TODO support Paths++
-
         if (!QueuedUpgrades.Any()) return;
 
         var queuedUpgrade = QueuedUpgrades.First();
@@ -101,19 +116,22 @@ public class UpgradeQueueing : ToggleableUtility
         if (towerManager.CanUpgradeTower(tower, queuedUpgrade.Path, queuedUpgrade.Tier, tower.PlayerOwnerId,
                 ref cost))
         {
-            var towerModel =
-                InGame.Bridge.Model.GetTowerFromId(GetUpgrade(tower.towerModel, queuedUpgrade.Path)!.tower);
+            var upm = GetUpgrade(tower.towerModel, queuedUpgrade.Path);
+            var towerModel = upm == null
+                ? tower.rootModel.Cast<TowerModel>()
+                : InGame.Bridge.Model.GetTowerFromId(upm.tower);
 
             QueuedUpgrades.Remove(queuedUpgrade);
 
             towerManager.UpgradeTower(tower.PlayerOwnerId, tower, towerModel, queuedUpgrade.Path, cost);
         }
-
     }
 
-    // TODO support Paths++
     private static UpgradePathModel? GetUpgrade(TowerModel towerModel, int path) => towerModel.upgrades
         .FirstOrDefault(u => InGame.Bridge.Model.GetUpgrade(u.upgrade).path == path);
+
+    private static List<int> Tiers(Tower tower) =>
+        PathsPlusPlus?.Call("GetTiers", tower) as List<int> ?? tower.towerModel.tiers.ToList();
 
     // TODO delay after upgrading
     [HarmonyPatch(typeof(TowerSelectionMenu), nameof(TowerSelectionMenu.UpgradeTower), typeof(int), typeof(bool))]
@@ -135,23 +153,57 @@ public class UpgradeQueueing : ToggleableUtility
                 .Where(upgrade => upgrade.TowerId == tower.Id)
                 .ToArray();
 
+            var tiers = Tiers(tower.tower).ToArray();
             var gameModel = __instance.Bridge.Model;
             var towerModel = tower.Def;
             foreach (var queuedUpgrade in queuedUpgradesForTower)
             {
-                var u = GetUpgrade(towerModel, queuedUpgrade.Path);
-                if (u == null) return !shift;
-                towerModel = gameModel.GetTowerFromId(u.tower);
+                tiers[queuedUpgrade.Path] = queuedUpgrade.Tier;
+
+                if (queuedUpgrade is { Path: < 3, Tier: <= 5 })
+                {
+                    var u = GetUpgrade(towerModel, queuedUpgrade.Path);
+                    if (u == null) return !shift;
+                    towerModel = gameModel.GetTowerFromId(u.tower);
+                }
+
+                if (PathsPlusPlus != null)
+                {
+                    for (var path = 0; path < tiers.Length; path++)
+                    {
+                        if (!(bool) PathsPlusPlus.Call("ValidTiers", towerModel.baseId, path, tiers))
+                        {
+                            return !shift;
+                        }
+                    }
+                }
+            }
+            var tier = ++tiers[index];
+
+            string? upgrade = null;
+            if (index < 3 && tier <= 5)
+            {
+                upgrade = GetUpgrade(towerModel, index)?.upgrade;
             }
 
-            var upgrade = GetUpgrade(towerModel, index);
-            if (upgrade == null) return !shift;
+            if (PathsPlusPlus != null)
+            {
+                for (var path = 0; path < tiers.Length; path++)
+                {
+                    if (!(bool) PathsPlusPlus.Call("ValidTiers", towerModel.baseId, path, tiers))
+                    {
+                        return !shift;
+                    }
+                }
 
-            var tier = towerModel.tiers[index] + 1;
+                upgrade ??= PathsPlusPlus.Call("GetUpgrade", towerModel.baseId, index, tier - 1) as string;
+            }
+
+            if (upgrade == null) return !shift;
 
             if (!__instance.Bridge.IsUpgradeLocked(tower.Id, index, tier))
             {
-                EnqueueUpgrade(new QueuedUpgrade(tower.Id, index, tier, upgrade.upgrade));
+                EnqueueUpgrade(new QueuedUpgrade(tower.Id, index, tier, upgrade));
             }
 
             return !shift;
@@ -315,7 +367,17 @@ public class UpgradeQueueing : ToggleableUtility
         [HarmonyPostfix]
         internal static void Postfix()
         {
-            TaskScheduler.ScheduleTask(OnQueueChanged, ScheduleType.WaitForFrames, 1);
+            PruneQueue();
+        }
+    }
+
+    [HarmonyPatch(typeof(Tower), nameof(Tower.OnUpgrade))]
+    internal static class Tower_OnUpgrade
+    {
+        [HarmonyPostfix]
+        internal static void Postfix(Tower __instance)
+        {
+            PruneQueue();
         }
     }
 }
