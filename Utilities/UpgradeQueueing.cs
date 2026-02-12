@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BTD_Mod_Helper;
 using BTD_Mod_Helper.Api.Components;
-using BTD_Mod_Helper.Api.Enums;
+using BTD_Mod_Helper.Api.ModOptions;
 using HarmonyLib;
 using Il2CppAssets.Scripts;
 using Il2CppAssets.Scripts.Models.Towers;
@@ -20,15 +20,27 @@ using UnityEngine.UI;
 
 namespace UsefulUtilities.Utilities;
 
-public class UpgradeQueueing : ToggleableUtility
+public class UpgradeQueueing : UsefulUtility
 {
+    public enum Mode
+    {
+        Off,
+        Shift,
+        Any
+    }
+
     protected override int Order => -1;
 
-    protected override bool DefaultEnabled => true;
+    public static readonly ModSettingEnum<Mode> UpgradeQueueingMode = new(Mode.Shift)
+    {
+        description = "Allows you to queue upgrades to be automatically purchased later once you have the cash. " +
+                      "Default mode is 'Shift', which means holding the Shift key while trying to upgrade a tower will queue the upgrade. " +
+                      "The 'Any' mode makes any upgrade attempt queue the upgrade if you don't have the cash for it."
+    };
 
-    public override string Description =>
-        "If you attempt to purchase an Upgrade when you don't have the cash for it, " +
-        "it will be queued to automatically purchase once you do.";
+    public static bool Off => UpgradeQueueingMode == Mode.Off;
+    public static bool Shift => UpgradeQueueingMode == Mode.Shift;
+    public static bool Any => UpgradeQueueingMode == Mode.Any;
 
     public record QueuedUpgrade(ObjectId TowerId, int Path, int Tier, string UpgradeId);
     public static readonly List<QueuedUpgrade> QueuedUpgrades = [];
@@ -83,9 +95,13 @@ public class UpgradeQueueing : ToggleableUtility
         }
     }
 
+    private static float delay;
+
     public override void OnUpdate()
     {
-        if (!Enabled || InGame.instance == null || InGame.Bridge == null) return;
+        if (Off || InGame.instance == null || InGame.Bridge == null) return;
+
+        if (delay > 0) delay -= Time.unscaledDeltaTime;
 
         // Make upgrade hotkeys work with queueing with Shift
         if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) &&
@@ -133,7 +149,6 @@ public class UpgradeQueueing : ToggleableUtility
     private static List<int> Tiers(Tower tower) =>
         PathsPlusPlus?.Call("GetTiers", tower) as List<int> ?? tower.towerModel.tiers.ToList();
 
-    // TODO delay after upgrading
     [HarmonyPatch(typeof(TowerSelectionMenu), nameof(TowerSelectionMenu.UpgradeTower), typeof(int), typeof(bool))]
     internal static class TowerSelectionMenu_UpgradeTower
     {
@@ -141,7 +156,7 @@ public class UpgradeQueueing : ToggleableUtility
         internal static bool Prefix(TowerSelectionMenu __instance, int index, bool isParagon)
         {
             var shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-            if (!GetInstance<UpgradeQueueing>().Enabled || isParagon) return true;
+            if (isParagon || delay > 0 || Off || Shift && !shift) return true;
 
             var tower = __instance.selectedTower;
 
@@ -204,6 +219,7 @@ public class UpgradeQueueing : ToggleableUtility
             if (!__instance.Bridge.IsUpgradeLocked(tower.Id, index, tier))
             {
                 EnqueueUpgrade(new QueuedUpgrade(tower.Id, index, tier, upgrade));
+                delay = .1f;
             }
 
             return !shift;
@@ -216,7 +232,7 @@ public class UpgradeQueueing : ToggleableUtility
         [HarmonyPrefix]
         internal static void Prefix(CashDisplay __instance)
         {
-            if (!GetInstance<UpgradeQueueing>().Enabled) return;
+            if (Off) return;
 
             UpgradeQueue.Create(__instance.transform);
         }
@@ -228,7 +244,7 @@ public class UpgradeQueueing : ToggleableUtility
         [HarmonyPostfix]
         internal static void Postfix(CashDisplay __instance)
         {
-            if (!GetInstance<UpgradeQueueing>().Enabled) return;
+            if (Off) return;
 
             var upgradeQueue = __instance.GetComponentInChildren<UpgradeQueue>();
             if (upgradeQueue == null) return;
@@ -327,7 +343,7 @@ public class UpgradeQueueing : ToggleableUtility
         [HarmonyPostfix]
         internal static void Postfix(UpgradeObject __instance)
         {
-            if (!GetInstance<UpgradeQueueing>().Enabled) return;
+            if (Off) return;
 
             for (var i = 0; i < __instance.tiers.Count; i++)
             {

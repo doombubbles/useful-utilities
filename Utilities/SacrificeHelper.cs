@@ -9,6 +9,7 @@ using BTD_Mod_Helper.Extensions;
 using HarmonyLib;
 using Il2Cpp;
 using Il2CppAssets.Scripts.Data.ParagonData;
+using Il2CppAssets.Scripts.Models;
 using Il2CppAssets.Scripts.Models.Towers.Behaviors;
 using Il2CppAssets.Scripts.Models.Towers.Upgrades;
 using Il2CppAssets.Scripts.Simulation.Towers;
@@ -32,7 +33,6 @@ namespace SacrificeHelper;
 #endif
 
 #if USEFUL_UTILITIES
-
 public class SacrificeHelper : UsefulUtility
 #else
 using BTD_Mod_Helper.Api.Helpers;
@@ -103,6 +103,27 @@ public class SacrificeHelperUtility : IModSettings
     }
 
 
+#if !USEFUL_UTILITIES
+    public static void UpdateUpgradeCosts(GameModel? gameModel = null)
+    {
+        gameModel ??= InGame.instance.GetGameModel();
+
+        var templeUpgrade = gameModel.GetUpgrade(UpgradeType.SunTemple);
+        var godUpgrade = gameModel.GetUpgrade(UpgradeType.TrueSunGod);
+        if (SacrificeHelperMod.templeSacrificesOff)
+        {
+            Utils.ModifyTemple(templeUpgrade);
+            Utils.ModifyGod(godUpgrade);
+        }
+        else
+        {
+            Utils.DefaultTemple(templeUpgrade);
+            Utils.DefaultGod(godUpgrade);
+        }
+    }
+#endif
+
+
     [RegisterTypeInIl2Cpp(false)]
     public class SacrificeHelperUI(IntPtr ptr) : MonoBehaviour(ptr)
     {
@@ -113,12 +134,19 @@ public class SacrificeHelperUtility : IModSettings
         private static bool showingExtraTempleInfo;
 #else
         // ReSharper disable once InconsistentNaming
-        private static bool showingExtraTempleInfo
-        {
-            get => !SacrificeHelperMod.templeSacrificesOff;
-            set => SacrificeHelperMod.templeSacrificesOff = !value;
-        }
+        private static bool showingExtraTempleInfo => !SacrificeHelperMod.templeSacrificesOff &&
+                                                      SacrificeHelperMod.AutoSacrificeMode == AutoSacrificeMode.Off;
 #endif
+
+        private static void ToggleShowingExtraInfo()
+        {
+#if USEFUL_UTILITIES
+            showingExtraTempleInfo = !showingExtraTempleInfo;
+#else
+            SacrificeHelperMod.templeSacrificesOff = !SacrificeHelperMod.templeSacrificesOff;
+#endif
+        }
+
         private static bool showingExtraParagonInfo;
 
         public TowerSelectionMenu menu = null!;
@@ -174,9 +202,16 @@ public class SacrificeHelperUtility : IModSettings
             sacrificeToggle = templeStuff.AddButton(new Info("TempleButton", 375, -75, 120),
                 NotificationYellow, new Action(() =>
                 {
-                    showingExtraTempleInfo = !showingExtraTempleInfo;
+                    ToggleShowingExtraInfo();
 #if !USEFUL_UTILITIES
                     UpdateUpgradeCosts();
+
+                    for (var i = 0; i < menu.upgradeButtons.Count; i++)
+                    {
+                        var upgradeButton = menu.upgradeButtons[i]!;
+                        upgradeButton.UpdateCost();
+                        upgradeButton.UpdateVisuals(i, false);
+                    }
 #endif
                     UpdateExtraInfo();
                 }));
@@ -267,32 +302,6 @@ public class SacrificeHelperUtility : IModSettings
                 extraSacrificeInfo.SetActive(showingExtraTempleInfo);
             }
         }
-
-#if !USEFUL_UTILITIES
-        private void UpdateUpgradeCosts()
-        {
-            var gameModel = InGame.instance.GetGameModel();
-            var templeUpgrade = gameModel.GetUpgrade(UpgradeType.SunTemple);
-            var godUpgrade = gameModel.GetUpgrade(UpgradeType.TrueSunGod);
-            if (SacrificeHelperMod.templeSacrificesOff)
-            {
-                Utils.ModifyTemple(templeUpgrade);
-                Utils.ModifyGod(godUpgrade);
-            }
-            else
-            {
-                Utils.DefaultTemple(templeUpgrade);
-                Utils.DefaultGod(godUpgrade);
-            }
-
-            for (var i = 0; i < menu.upgradeButtons.Count; i++)
-            {
-                var upgradeButton = menu.upgradeButtons[i];
-                upgradeButton.UpdateCost();
-                upgradeButton.UpdateVisuals(i, false);
-            }
-        }
-#endif
 
         private static ModHelperText CreateInfoLine(ModHelperPanel parent, string id, string icon)
         {
@@ -392,9 +401,17 @@ public class SacrificeHelperUtility : IModSettings
 #if !USEFUL_UTILITIES
         public static void DefaultTemple(UpgradeModel upgradeModel)
         {
-            upgradeModel.confirmation = UpgradeType.SunTemple;
+            upgradeModel.confirmation = SacrificeHelperMod.AutoSacrificeMode == AutoSacrificeMode.Off
+                ? UpgradeType.SunTemple
+                : "";
             var baseCost = Game.instance.model.GetUpgrade(upgradeModel.name).cost;
-            upgradeModel.cost = CostHelper.CostForDifficulty(baseCost, InGame.instance);
+            upgradeModel.cost = CostHelper.CostForDifficulty(baseCost, InGame.instance) +
+                                SacrificeHelperMod.AutoSacrificeMode switch
+                                {
+                                    AutoSacrificeMode.Off => 0,
+                                    AutoSacrificeMode.Sacrifice2222 => 200_000,
+                                    _ => 150_000
+                                };
         }
 
         public static void ModifyTemple(UpgradeModel upgradeModel)
@@ -407,9 +424,16 @@ public class SacrificeHelperUtility : IModSettings
 
         public static void DefaultGod(UpgradeModel upgradeModel)
         {
-            upgradeModel.confirmation = UpgradeType.TrueSunGod;
+            upgradeModel.confirmation = SacrificeHelperMod.AutoSacrificeMode == AutoSacrificeMode.Off
+                ? UpgradeType.TrueSunGod
+                : "";
             var baseCost = Game.instance.model.GetUpgrade(upgradeModel.name).cost;
-            upgradeModel.cost = CostHelper.CostForDifficulty(baseCost, InGame.instance);
+            upgradeModel.cost = CostHelper.CostForDifficulty(baseCost, InGame.instance) +
+                                SacrificeHelperMod.AutoSacrificeMode switch
+                                {
+                                    AutoSacrificeMode.Off => 0,
+                                    _ => 200_000
+                                };
         }
 
         public static void ModifyGod(UpgradeModel upgradeModel)

@@ -76,6 +76,7 @@ public class UsefulUtilitiesMod : BloonsTD6Mod
     public override void OnMatchStart()
     {
         Meters.ClearData();
+        UpgradeQueueing.QueuedUpgrades.Clear();
     }
 
     public override void OnGameObjectsReset()

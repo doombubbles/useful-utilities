@@ -127,9 +127,9 @@ public class CopyPasteTowersUtility
         var name = LocalizationManager.Instance.GetText(tower.towerModel.name);
         var message = $"Copied {name}\n\nTotal Cost is ${(int) cost}";
 #if USEFUL_UTILITIES
-        if (GetInstance<UpgradeQueueing>().Enabled)
+        if (!UpgradeQueueing.Off)
         {
-            message += $" $({baseCost} for queued)";
+            message += $" $({(int) baseCost} for queued)";
         }
 #endif
         Game.instance.ShowMessage(message);
@@ -146,7 +146,7 @@ public class CopyPasteTowersUtility
 #if USEFUL_UTILITIES
         if (InGame.instance.GetCash() < cost)
         {
-            if (!GetInstance<UpgradeQueueing>().Enabled) return;
+            if (UpgradeQueueing.Off) return;
             if (InGame.instance.GetCash() < baseCost) return;
 
             var baseTower = InGame.Bridge.Model.GetTower(clipboard.baseId);
@@ -264,6 +264,8 @@ public class CopyPasteTowersUtility
                 mod.Call("OnTowerPasted", __instance);
             }
 
+            __instance.worth = CalculateCost(__instance);
+            InGame.instance.AddCash(-__instance.worth + __instance.towerModel.cost);
 
 #if USEFUL_UTILITIES
             if (queued)
@@ -274,13 +276,6 @@ public class CopyPasteTowersUtility
                     UpgradeQueueing.EnqueueUpgrade(new(__instance.Id, upgradeModel.path, upgradeModel.tier + 1,
                         upgradeModel.name));
                 }
-            }
-            else
-            {
-#endif
-                __instance.worth = CalculateCost(__instance);
-                InGame.instance.AddCash(-__instance.worth + __instance.towerModel.cost);
-#if USEFUL_UTILITIES
             }
 #endif
             justPastedTower = true;
