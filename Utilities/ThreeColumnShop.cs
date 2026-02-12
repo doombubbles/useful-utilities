@@ -4,6 +4,7 @@ using BTD_Mod_Helper.Api.UI;
 using HarmonyLib;
 using Il2CppAssets.Scripts.Unity.Display;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.RightMenu;
+using Il2CppNinjaKiwi.Common;
 using UnityEngine;
 using UnityEngine.UI;
 namespace UsefulUtilities.Utilities;
@@ -22,13 +23,13 @@ public class ThreeColumnShop : ToggleableUtility
     {
         base.OnRegister();
 
-        ScreenResizeDetector.Instance.onScreenSizeChanged += new Action<int, int>((_, _) =>
+        Messaging<OnScreenSizeDidChange>.Register(new Action<int, int, bool>((_, _, _) =>
         {
             if (ShopMenu.instance != null)
             {
                 UpdateShop(ShopMenu.instance);
             }
-        });
+        }));
     }
 
     private void UpdateShop(ShopMenu shopMenu)

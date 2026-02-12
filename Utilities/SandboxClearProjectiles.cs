@@ -1,12 +1,8 @@
-﻿using System;
-using BTD_Mod_Helper.Api.Components;
-using BTD_Mod_Helper.Api.ModOptions;
-using BTD_Mod_Helper.Extensions;
+﻿using BTD_Mod_Helper.Api.ModOptions;
 using HarmonyLib;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.BloonMenu;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using Object = UnityEngine.Object;
 
 namespace UsefulUtilities.Utilities;
@@ -27,17 +23,15 @@ public class SandboxClearProjectiles : ToggleableUtility
         {
             if (!GetInstance<SandboxClearProjectiles>().Enabled) return;
 
-            var clearProjectiles = Object.Instantiate(__instance.btnResetDamage, __instance.transform);
+            var clearProjectiles = Object.Instantiate(__instance.btnResetDamage,
+                __instance.btnResetDamage.transform.parent, false);
 
+            clearProjectiles.transform.SetAsFirstSibling();
             clearProjectiles.image.SetSprite(GetSpriteReference<UsefulUtilitiesMod>(nameof(SandboxClearProjectiles)));
-
-            var matchLocalPosition = clearProjectiles.gameObject.AddComponent<MatchLocalPosition>();
-            matchLocalPosition.transformToCopy = __instance.btnResetDamage.transform;
-            matchLocalPosition.offset = new Vector3(0, 213, 0);
-
             clearProjectiles.onClick.SetListener(() => InGame.Bridge.DestroyAllProjectiles());
-
             clearProjectiles.gameObject.SetActive(true);
+            clearProjectiles.transform.parent.parent.GetComponent<RectTransform>().sizeDelta += new Vector2(0, 420);
+            clearProjectiles.transform.parent.localPosition += new Vector3(0, 420 * .75f, 0);
         }
     }
 }

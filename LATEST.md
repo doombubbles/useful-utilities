@@ -1,3 +1,5 @@
+- Fixed for BTD6 v53
+
 ## Upgrade Queueing
 - Allows you to queue upgrades to be automatically purchased later once you have the cash.
   - Default mode is 'Shift', which means holding the Shift key while trying to upgrade a tower will queue the upgrade.
