@@ -1,2 +1,3 @@
 - Removed Indiscriminate Pets as NK added it themselves
 - Updated Jukebox Folder to always support all audio file types that Mod Helper does
+- Added "Map Editor Placeable Counts" utility to show prop/stamp current counts and maximum
