@@ -25,7 +25,7 @@ public class JukeboxFolder : UsefulUtility
             icon = VanillaSprites.JukeboxIcon,
             category = UsefulUtilitiesMod.Jukebox,
             description =
-                "Any .mp3 or .wav files you put in this folder will be automatically loaded into the BTD6 Jukebox. " +
+                "Audio files you put in this folder will be automatically loaded into the BTD6 Jukebox. " +
                 "Can add new tracks from files without restarting the game, but can't delete them.",
             onSave = newPath =>
             {
@@ -77,8 +77,10 @@ public class JukeboxFolder : UsefulUtility
         if (!Directory.Exists(FolderPath)) Directory.CreateDirectory(FolderPath);
 
         watcher = new FileSystemWatcher(FolderPath);
-        watcher.Filters.Add("*.mp3");
-        watcher.Filters.Add("*.wav");
+        foreach (var extension in ResourceHandler.AudioExtensions)
+        {
+            watcher.Filters.Add("*" + extension);
+        }
         watcher.IncludeSubdirectories = true;
         watcher.Created += (_, args) => TaskScheduler.ScheduleTask(() => TaskRun(() => LoadTrack(args.FullPath)),
             ScheduleType.WaitForSeconds, 1);
@@ -90,8 +92,9 @@ public class JukeboxFolder : UsefulUtility
     public static void LoadAllTracks(string path)
     {
         if (!Directory.Exists(FolderPath)) Directory.CreateDirectory(FolderPath);
-        var files = Directory.EnumerateFiles(path, "*.mp3", SearchOption.AllDirectories)
-            .Concat(Directory.EnumerateFiles(path, "*.wav", SearchOption.AllDirectories));
+
+        var files = ResourceHandler.AudioExtensions
+            .SelectMany(extension => Directory.EnumerateFiles(path, "*" + extension, SearchOption.AllDirectories));
 
         foreach (var file in files)
         {
@@ -108,17 +111,10 @@ public class JukeboxFolder : UsefulUtility
 
         ModHelper.Msg<UsefulUtilitiesMod>($"Adding track \"{name}\" from {filePath}");
         var start = DateTime.Now;
-        var extension = Path.GetExtension(filePath);
+
         try
         {
-            using WaveStream waveStream = extension switch
-            {
-                ".wav" => new WaveFileReader(filePath),
-                ".mp3" => new Mp3FileReader(filePath),
-                ".ogg" => new VorbisWaveReader(filePath),
-                _ => throw new Exception("Unknown audio format")
-            };
-
+            using var waveStream = ResourceHandler.GetWaveStream(filePath);
             var audioClip = ResourceHandler.CreateAudioClip(waveStream, id);
 
             if (audioClip is null) return;

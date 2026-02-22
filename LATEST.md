@@ -1,1 +1,2 @@
 - Removed Indiscriminate Pets as NK added it themselves
+- Updated Jukebox Folder to always support all audio file types that Mod Helper does

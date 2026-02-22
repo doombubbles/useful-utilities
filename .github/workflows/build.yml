@@ -11,6 +11,7 @@ env:
   PROJECT_NAME: UsefulUtilities
   
   MOD_HELPER_NAME: Btd6ModHelper
+  MOD_HELPER_BRANCH: master
   BLOONSTD6: ./BloonsTD6
 
 jobs:
