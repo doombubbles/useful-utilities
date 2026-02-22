@@ -62,8 +62,6 @@ shop for BTD6 utilities.
   - Right click the Play / Fast Forward button toggle auto start, and it has a new visual indicator
 - Copy/Paste Towers
   - Ctrl + C to copy towers, Ctrl + V to paste towers (calculates full upgrade costs)
-- Indiscriminate Pets
-  - Use hero pets regardless of hero skin
 - In-Game Hero Switch
   - Hotkeys to switch which hero you're using if you haven't placed one down yet
 
