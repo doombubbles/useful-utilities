@@ -1,11 +1,13 @@
-﻿using BTD_Mod_Helper.Api.Enums;
-using BTD_Mod_Helper.Extensions;
+﻿using System;
+using BTD_Mod_Helper.Api.Enums;
 using HarmonyLib;
+using Il2CppAssets.Scripts.Simulation;
 using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.Bridge;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.ActionMenu;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.RightMenu;
+using Il2CppAssets.Scripts.Unity.UI_New.Popups;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -28,7 +30,8 @@ public class BetterAutoStartUtility
     protected override bool DefaultEnabled => true;
 
     public override string Description => "Makes the Auto Start setting visible on the Play button, " +
-                                          "and causes right clicking the play button to toggle Auto Start";
+                                          "and causes right clicking the play button to toggle Auto Start. " +
+                                          "Middle clicking the button will let you set an upcoming round to automatically disable auto start before.";
 
     private static bool IsEnabled => GetInstance<BetterAutoStart>().Enabled;
 
@@ -38,6 +41,8 @@ public class BetterAutoStartUtility
 
     private static Sprite GetSprite(string name) => ModContent.GetSprite<BetterAutoStartMod>(name);
 #endif
+
+    private static int turnOffOnRound = -1;
 
     private static void UpdateTextures(GoFastForwardToggle toggle, bool enabled)
     {
@@ -62,13 +67,33 @@ public class BetterAutoStartUtility
         internal static void Postfix(Button __instance, PointerEventData eventData)
         {
             if (InGame.instance == null ||
-                eventData.button != PointerEventData.InputButton.Right ||
                 __instance.name != "FastFoward-Go" || // yes this is a real typo in the name
                 !IsEnabled) return;
 
-            var newValue = !InGame.instance.bridge.simulation.autoPlay;
-            Game.instance.GetPlayerProfile().inGameSettings.autoPlay = newValue;
-            InGame.instance.bridge.SetAutoPlay(newValue);
+            switch (eventData.button)
+            {
+                case PointerEventData.InputButton.Right:
+                {
+                    var newValue = !InGame.instance.bridge.simulation.autoPlay;
+                    Game.instance.GetPlayerProfile().inGameSettings.autoPlay = newValue;
+                    InGame.instance.bridge.SetAutoPlay(newValue);
+                    break;
+                }
+                case PointerEventData.InputButton.Middle:
+                {
+                    Game.instance.GetPlayerProfile().inGameSettings.autoPlay = true;
+                    InGame.instance.bridge.SetAutoPlay(true);
+                    PopupScreen.instance.ShowSetValuePopup("Disable Auto Start on Round",
+                        "Auto Start will automatically disable just before the given round starts.",
+                        new Action<int>(r =>
+                        {
+                            turnOffOnRound = r - 1;
+                        }), InGame.Bridge.GetEndRound() + 1);
+
+                    break;
+                }
+            }
+
         }
     }
 
@@ -95,6 +120,30 @@ public class BetterAutoStartUtility
             {
                 UpdateTextures(ShopMenu.instance.goFFToggle, on);
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(Simulation), nameof(Simulation.RoundEnd))]
+    internal static class Simulation_RoundEnd
+    {
+        [HarmonyPrefix]
+        internal static void Prefix(Simulation __instance, int round)
+        {
+            if (round + 1 == turnOffOnRound)
+            {
+                __instance.pauseAutoPlay = true;
+                turnOffOnRound = -1;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(InGame), nameof(InGame.Quit))]
+    internal static class InGame_Quit
+    {
+        [HarmonyPostfix]
+        internal static void Postfix()
+        {
+            turnOffOnRound = -1;
         }
     }
 }
