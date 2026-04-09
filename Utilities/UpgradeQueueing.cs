@@ -256,8 +256,8 @@ public class UpgradeQueueing : UsefulUtility
     [RegisterTypeInIl2Cpp(false)]
     internal class UpgradeQueue(IntPtr ptr) : MonoBehaviour(ptr)
     {
-        public static UpgradeQueue Instance { get; private set; }
-        public ModHelperScrollPanel scrollPanel;
+        public static UpgradeQueue Instance { get; private set; } = null!;
+        public ModHelperScrollPanel scrollPanel = null!;
         // public Vector3 offset = new(-250, -10, 0);
 
         public readonly Il2CppSystem.Collections.Generic.List<QueuedUpgradeIcon> allIcons = new();
@@ -306,7 +306,7 @@ public class UpgradeQueueing : UsefulUtility
     [RegisterTypeInIl2Cpp(false)]
     internal class QueuedUpgradeIcon(IntPtr ptr) : MonoBehaviour(ptr)
     {
-        public ModHelperButton button;
+        public ModHelperButton button = null!;
         public QueuedUpgrade? upgrade;
 
         [HideFromIl2Cpp]

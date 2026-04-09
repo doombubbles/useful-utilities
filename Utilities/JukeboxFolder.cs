@@ -7,10 +7,8 @@ using BTD_Mod_Helper.Api.Audio;
 using BTD_Mod_Helper.Api.Enums;
 using BTD_Mod_Helper.Api.Internal;
 using BTD_Mod_Helper.Api.ModOptions;
-using Il2CppNinjaKiwi.Common;
+using Il2CppNinjaKiwi.Localization;
 using MelonLoader.Utils;
-using NAudio.Vorbis;
-using NAudio.Wave;
 using UnityEngine;
 using TaskScheduler = BTD_Mod_Helper.Api.TaskScheduler;
 

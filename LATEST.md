@@ -1,3 +1,2 @@
-- Removed Indiscriminate Pets as NK added it themselves
-- Updated Jukebox Folder to always support all audio file types that Mod Helper does
-- Added "Map Editor Placeable Counts" utility to show prop/stamp current counts and maximum
+- Updated for BTD6 v54
+- Added a new feature where Middle-Clicking the play button will show a popup allowing you to specify a round before which autostart should be automatically paused

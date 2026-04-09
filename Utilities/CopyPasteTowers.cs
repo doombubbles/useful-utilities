@@ -13,7 +13,7 @@ using Il2CppAssets.Scripts.Simulation.Towers.Behaviors;
 using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
-using Il2CppNinjaKiwi.Common;
+using Il2CppNinjaKiwi.Localization;
 using UnityEngine;
 using Math = Il2CppAssets.Scripts.Simulation.SMath.Math;
 
