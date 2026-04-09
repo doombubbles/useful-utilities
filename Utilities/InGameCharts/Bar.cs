@@ -1,7 +1,6 @@
 ﻿using System;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
-using BTD_Mod_Helper.Extensions;
 using Il2CppInterop.Runtime.Attributes;
 using Il2CppTMPro;
 using MelonLoader;

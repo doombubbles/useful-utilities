@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
-using BTD_Mod_Helper.Api.Components;
-using BTD_Mod_Helper.Extensions;
 using Il2CppAssets.Scripts.Unity.UI_New.Popups;
 using Il2CppTMPro;
 using UnityEngine;

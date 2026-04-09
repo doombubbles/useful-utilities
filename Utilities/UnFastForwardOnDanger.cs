@@ -1,10 +1,8 @@
 ﻿using BTD_Mod_Helper.Api.Enums;
 using BTD_Mod_Helper.Api.ModOptions;
-using BTD_Mod_Helper.Extensions;
 using HarmonyLib;
 using Il2CppAssets.Scripts.Simulation;
 using Il2CppAssets.Scripts.Simulation.Bloons;
-using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using UnityEngine;
 namespace UsefulUtilities.Utilities;
 

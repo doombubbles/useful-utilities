@@ -1,5 +1,4 @@
-﻿using BTD_Mod_Helper.Extensions;
-using Il2CppAssets.Scripts.Unity.Bridge;
+﻿using Il2CppAssets.Scripts.Unity.Bridge;
 namespace UsefulUtilities.Utilities.InGameCharts.GroupTypes;
 
 public class ByTowerTier : GroupType

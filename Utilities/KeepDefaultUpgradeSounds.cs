@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using BTD_Mod_Helper.Api.Enums;
 using BTD_Mod_Helper.Api.ModOptions;
-using BTD_Mod_Helper.Extensions;
 using Il2CppAssets.Scripts.Data;
 using Il2CppAssets.Scripts.Data.Cosmetics;
 using Il2CppAssets.Scripts.Data.Cosmetics.TowerAssetChanges;

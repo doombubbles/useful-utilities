@@ -1,6 +1,5 @@
 ﻿using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.ModOptions;
-using BTD_Mod_Helper.Extensions;
 using Il2CppAssets.Scripts.Unity.Analytics;
 using Il2CppAssets.Scripts.Unity.Menu;
 using Il2CppAssets.Scripts.Unity.UI_New.Settings;
