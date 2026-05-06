@@ -113,6 +113,7 @@ public class InGameHeroSwitchUtility
 
     private static void RefreshShop(bool playSound)
     {
+        if (ShopMenu.instance is null) return;
         var disallowSelectingDifferentTowers = ShopMenu.instance.disallowSelectingDifferentTowers;
         ShopMenu.instance.disallowSelectingDifferentTowers = !playSound;
         ShopMenu.instance.RebuildTowerSet();

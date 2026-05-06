@@ -148,6 +148,8 @@ public class Meters : ModWindow, IModSettings
 
     public static void GetRoundData()
     {
+        if (InGame.Bridge == null) return;
+
         var towers = InGame.Bridge.Simulation.towerManager.GetTowers().ToArray();
 
         foreach (var tower in towers)

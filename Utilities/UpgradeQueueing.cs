@@ -8,7 +8,9 @@ using HarmonyLib;
 using Il2CppAssets.Scripts;
 using Il2CppAssets.Scripts.Models.Towers;
 using Il2CppAssets.Scripts.Models.Towers.Upgrades;
+using Il2CppAssets.Scripts.Simulation;
 using Il2CppAssets.Scripts.Simulation.Towers;
+using Il2CppAssets.Scripts.Unity.Bridge;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.Stats;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
@@ -85,7 +87,7 @@ public class UpgradeQueueing : UsefulUtility
 
     public static void PruneQueue()
     {
-        var towerManager = InGame.Bridge.Simulation.towerManager;
+        var towerManager = Simulation.Current.towerManager;
         var removed = QueuedUpgrades.RemoveAll(upgrade =>
             towerManager.GetTowerById(upgrade.TowerId) is not { IsDestroyed: false } tower ||
             Tiers(tower)[upgrade.Path] >= upgrade.Tier);
@@ -120,7 +122,7 @@ public class UpgradeQueueing : UsefulUtility
             }
         }
 
-        var towerManager = InGame.Bridge.Simulation.towerManager;
+        var towerManager = Simulation.Current.towerManager;
 
         if (!QueuedUpgrades.Any()) return;
 
@@ -132,14 +134,13 @@ public class UpgradeQueueing : UsefulUtility
         if (towerManager.CanUpgradeTower(tower, queuedUpgrade.Path, queuedUpgrade.Tier, tower.PlayerOwnerId,
                 ref cost))
         {
-            var upm = GetUpgrade(tower.towerModel, queuedUpgrade.Path);
-            var towerModel = upm == null
-                ? tower.rootModel.Cast<TowerModel>()
-                : InGame.Bridge.Model.GetTowerFromId(upm.tower);
-
-            QueuedUpgrades.Remove(queuedUpgrade);
-
-            towerManager.UpgradeTower(tower.PlayerOwnerId, tower, towerModel, queuedUpgrade.Path, cost);
+            UnityToSimulation.Current.UpgradeTower(tower.Id, queuedUpgrade.Path, 0, new Action<bool>(success =>
+            {
+                if (success)
+                {
+                    QueuedUpgrades.Remove(queuedUpgrade);
+                }
+            }));
         }
     }
 
@@ -196,10 +197,6 @@ public class UpgradeQueueing : UsefulUtility
             var tier = ++tiers[index];
 
             string? upgrade = null;
-            if (index < 3 && tier <= 5)
-            {
-                upgrade = GetUpgrade(towerModel, index)?.upgrade;
-            }
 
             if (PathsPlusPlus != null)
             {
@@ -211,7 +208,12 @@ public class UpgradeQueueing : UsefulUtility
                     }
                 }
 
-                upgrade ??= PathsPlusPlus.Call("GetUpgrade", towerModel.baseId, index, tier - 1) as string;
+                upgrade ??= PathsPlusPlus.Call("GetUpgrade", tower.tower, index, tier - 1) as string;
+            }
+
+            if (index < 3 && tier <= 5)
+            {
+                upgrade ??= GetUpgrade(towerModel, index)?.upgrade;
             }
 
             if (upgrade == null) return !shift;

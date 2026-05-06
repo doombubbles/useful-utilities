@@ -4,6 +4,7 @@ using BTD_Mod_Helper.Api.ModOptions;
 using Il2CppAssets.Scripts.Unity.Bridge;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
+using Il2CppAssets.Scripts.Unity.UI_New.Popups;
 using Il2CppSystem.IO;
 using UnityEngine;
 
@@ -32,7 +33,8 @@ public class TowerSelecting : UsefulUtility
     {
         if (InGame.instance == null ||
             TowerSelectionMenu.instance == null ||
-            InGame.instance.InputManager.IsInPlacementMode) return;
+            InGame.instance.InputManager.IsInPlacementMode ||
+            PopupScreen.instance?.IsPopupActive() == true) return;
 
         if (SelectNextTower.JustPressed())
         {
@@ -55,7 +57,7 @@ public class TowerSelecting : UsefulUtility
         {
             lastMousePos = InGame.instance.InputManager.cursorPositionWorld;
         }
-        
+
         var towers = bridge.GetAllTowers()
             .ToArray()
             .Where(tts => tts.IsSelectable)

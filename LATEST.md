@@ -1,2 +1,1 @@
-- Updated for BTD6 v54
-- Added a new feature where Middle-Clicking the play button will show a popup allowing you to specify a round before which autostart should be automatically paused
+- Minor improvements to Upgrade Queueing Paths++ support

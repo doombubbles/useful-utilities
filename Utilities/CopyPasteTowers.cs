@@ -113,9 +113,8 @@ public class CopyPasteTowersUtility
     {
         cost = CalculateCost(tower.towerModel) + ModifyClipboardCost(tower);
 
-        var inGameModel = InGame.instance.GetGameModel();
-        clipboard = inGameModel.GetTowerWithName(tower.towerModel.name);
-        var baseTower = inGameModel.GetTower(clipboard.baseId);
+        clipboard = tower.towerModel;
+        var baseTower = InGame.instance.GetGameModel().GetTower(clipboard.baseId);
 
         baseCost = baseTower.cost + ModifyClipboardCost(tower);
 
@@ -172,20 +171,21 @@ public class CopyPasteTowersUtility
         if (InGame.instance.GetCash() < cost) return;
 #endif
 
-        inputManager.EnterPlacementMode(clipboard, new Action<Vector2>(pos =>
-        {
-            try
+        inputManager.EnterPlacementMode(InGame.instance.GetGameModel().GetTowerWithName(clipboard.name),
+            new Action<Vector2>(pos =>
             {
-                nextPlaceIsPaste = true;
-                overrideNonPower = clipboard.isPowerProTower;
-                inputManager.CreatePlacementTower(pos);
-            }
-            catch (Exception e)
-            {
-                overrideNonPower = false;
-                MelonLogger.Error(e);
-            }
-        }), new ObjectId { data = (uint) InGame.instance.bridge.GetInputId() });
+                try
+                {
+                    nextPlaceIsPaste = true;
+                    overrideNonPower = clipboard.isPowerProTower;
+                    inputManager.CreatePlacementTower(pos);
+                }
+                catch (Exception e)
+                {
+                    overrideNonPower = false;
+                    MelonLogger.Error(e);
+                }
+            }), new ObjectId { data = (uint) InGame.instance.bridge.GetInputId() });
     }
 
     private static int ModifyClipboardCost(Tower tower) =>
@@ -251,8 +251,10 @@ public class CopyPasteTowersUtility
         {
             overrideNonPower = false;
 
+            var queued = false;
+
 #if USEFUL_UTILITIES
-            var queued = nextPlaceIsQueued;
+            queued = nextPlaceIsQueued;
             nextPlaceIsQueued = false;
 #endif
 
@@ -261,7 +263,7 @@ public class CopyPasteTowersUtility
 
             foreach (var mod in ModHelper.Mods)
             {
-                mod.Call("OnTowerPasted", __instance);
+                mod.Call("OnTowerPasted", __instance, queued);
             }
 
             __instance.worth = CalculateCost(__instance);
