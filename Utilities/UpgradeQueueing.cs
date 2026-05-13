@@ -134,18 +134,13 @@ public class UpgradeQueueing : UsefulUtility
         if (towerManager.CanUpgradeTower(tower, queuedUpgrade.Path, queuedUpgrade.Tier, tower.PlayerOwnerId,
                 ref cost))
         {
-            UnityToSimulation.Current.UpgradeTower(tower.Id, queuedUpgrade.Path, 0, new Action<bool>(success =>
-            {
-                if (success)
-                {
-                    QueuedUpgrades.Remove(queuedUpgrade);
-                }
-            }));
+            QueuedUpgrades.Remove(queuedUpgrade);
+            UnityToSimulation.Current.UpgradeTower(tower.Id, queuedUpgrade.Path, 0, new Action<bool>(_ => { }));
         }
     }
 
     private static UpgradePathModel? GetUpgrade(TowerModel towerModel, int path) => towerModel.upgrades
-        .FirstOrDefault(u => InGame.Bridge.Model.GetUpgrade(u.upgrade).path == path);
+        .FirstOrDefault(u => UnityToSimulation.Current.Model.GetUpgrade(u.upgrade)?.path == path);
 
     private static List<int> Tiers(Tower tower) =>
         PathsPlusPlus?.Call("GetTiers", tower) as List<int> ?? tower.towerModel.tiers.ToList();
