@@ -5,14 +5,13 @@ using BTD_Mod_Helper;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
 using BTD_Mod_Helper.Api.ModOptions;
+using BTD_Mod_Helper.Api.Towers;
 using HarmonyLib;
 using Il2Cpp;
 using Il2CppAssets.Scripts.Data.ParagonData;
 using Il2CppAssets.Scripts.Models.Towers.Behaviors;
-using Il2CppAssets.Scripts.Models.Towers.Upgrades;
 using Il2CppAssets.Scripts.Simulation.Towers;
 using Il2CppAssets.Scripts.Simulation.Towers.Behaviors;
-using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.Bridge;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
@@ -20,9 +19,10 @@ using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu.TowerSelection
 using Il2CppAssets.Scripts.Unity.UI_New.Popups;
 using Il2CppAssets.Scripts.Unity.UI_New.Utils;
 using Il2CppTMPro;
-using MelonLoader;
 using UnityEngine;
 using static BTD_Mod_Helper.Api.Enums.VanillaSprites;
+using Il2CppAssets.Scripts.Models.Towers.Upgrades;
+using Il2CppAssets.Scripts.Unity;
 
 #if USEFUL_UTILITIES
 namespace UsefulUtilities.Utilities;
@@ -36,7 +36,7 @@ public class SacrificeHelper : UsefulUtility
 using BTD_Mod_Helper.Api.Helpers;
 using Il2CppAssets.Scripts.Unity;
 using BTD_Mod_Helper.Api.Data;
-using Il2CppAssets.Scripts.Models.Towers.Upgrades;
+using Il2CppAssets.Scripts.Models;
 
 public class SacrificeHelperUtility : IModSettings
 #endif
@@ -62,45 +62,6 @@ public class SacrificeHelperUtility : IModSettings
         icon = PerfectParagonIcon
     };
 
-    [HarmonyPatch(typeof(TowerSelectionMenu), nameof(TowerSelectionMenu.UpdateTower))]
-    internal static class TowerSelectionMenu_UpdateTower
-    {
-        [HarmonyPostfix]
-        private static void Postfix(TowerSelectionMenu __instance)
-        {
-            var themeManager = __instance.themeManager;
-            var currentTheme = themeManager.CurrentTheme;
-
-            if (currentTheme == null) return;
-
-            var ui = currentTheme.GetComponent<SacrificeHelperUI>();
-            if (ui != null)
-            {
-                ui.TowerInfoChanged();
-            }
-        }
-    }
-
-
-    [HarmonyPatch(typeof(MenuThemeManager), nameof(MenuThemeManager.SetTheme))]
-    internal static class MenuThemeManager_SetTheme
-    {
-        [HarmonyPostfix]
-        private static void Postfix(MenuThemeManager __instance, BaseTSMTheme newTheme)
-        {
-            if (!__instance.PlayerContext.towerSelectionMenu.Is(out var menu)) return;
-
-            var ui = newTheme.GetComponent<SacrificeHelperUI>();
-            if (ui == null)
-            {
-                ui = newTheme.gameObject.AddComponent<SacrificeHelperUI>();
-                ui.Initialise(menu);
-                ui.TowerInfoChanged();
-            }
-        }
-    }
-
-
 #if !USEFUL_UTILITIES
     public static void UpdateUpgradeCosts(GameModel? gameModel = null)
     {
@@ -122,8 +83,7 @@ public class SacrificeHelperUtility : IModSettings
 #endif
 
 
-    [RegisterTypeInIl2Cpp(false)]
-    public class SacrificeHelperUI(IntPtr ptr) : MonoBehaviour(ptr)
+    public class SacrificeHelperTsm : ModVanillaTsmTheme
     {
         public const int InfoWidth = 500;
         public const int InfoHeight = 100;
@@ -147,8 +107,6 @@ public class SacrificeHelperUtility : IModSettings
 
         private static bool showingExtraParagonInfo;
 
-        public TowerSelectionMenu menu = null!;
-
         private ModHelperPanel paragonStuff = null!;
         private ModHelperButton degreeButton = null!;
         private ModHelperText degreeText = null!;
@@ -160,24 +118,22 @@ public class SacrificeHelperUtility : IModSettings
         private ModHelperPanel extraSacrificeInfo = null!;
         private Il2CppSystem.Collections.Generic.List<ModHelperText> sacrificeTowerSets = null!;
 
-        public void Initialise(TowerSelectionMenu towerSelectionMenu)
+        public override void SetupTheme(BaseTSMTheme theme)
         {
-            menu = towerSelectionMenu;
-
             if (ParagonSacrificeInfo)
             {
-                CreateParagonStuff();
+                CreateParagonStuff(theme);
             }
 
             if (TempleSacrificeInfo)
             {
-                CreateTempleStuff();
+                CreateTempleStuff(theme);
             }
         }
 
-        private void CreateParagonStuff()
+        private void CreateParagonStuff(BaseTSMTheme theme)
         {
-            paragonStuff = gameObject.AddModHelperPanel(new Info("ParagonStuff", InfoPreset.FillParent));
+            paragonStuff = theme.gameObject.AddModHelperPanel(new Info("ParagonStuff", InfoPreset.FillParent));
             degreeButton = paragonStuff.AddButton(new Info("ParagonButton", 375, -75, 135),
                 UpgradeContainerParagon, new Action(() =>
                 {
@@ -193,16 +149,17 @@ public class SacrificeHelperUtility : IModSettings
             paragonDetails = ParagonDetail.CreateTexts(extraParagonInfo).ToIl2CppList();
         }
 
-
-        private void CreateTempleStuff()
+        private void CreateTempleStuff(BaseTSMTheme theme)
         {
-            templeStuff = gameObject.AddModHelperPanel(new Info("TempleStuff", InfoPreset.FillParent));
+            templeStuff = theme.gameObject.AddModHelperPanel(new Info("TempleStuff", InfoPreset.FillParent));
             sacrificeToggle = templeStuff.AddButton(new Info("TempleButton", 375, -75, 120),
                 NotificationYellow, new Action(() =>
                 {
                     ToggleShowingExtraInfo();
 #if !USEFUL_UTILITIES
                     UpdateUpgradeCosts();
+
+                    var menu = theme.GetComponentInParent<TowerSelectionMenu>();
 
                     for (var i = 0; i < menu.upgradeButtons.Count; i++)
                     {
@@ -224,15 +181,9 @@ public class SacrificeHelperUtility : IModSettings
             sacrificeTowerSets = modHelperTexts.ToIl2CppList();
         }
 
-        public void TowerInfoChanged()
+        public override void TowerChanged(BaseTSMTheme theme, TowerToSimulation tower)
         {
-            var tower = menu.selectedTower;
-            if (tower == null)
-            {
-                MelonLogger.Warning("Couldn't update Paragon Helper UI because tower was null");
-                return;
-            }
-
+            if (tower == null) return;
 
             if (ParagonSacrificeInfo)
             {
@@ -311,7 +262,6 @@ public class SacrificeHelperUtility : IModSettings
         }
     }
 
-
     public class ParagonDetail
     {
         public static List<ParagonDetail> AllDetails { get; }
@@ -372,9 +322,10 @@ public class SacrificeHelperUtility : IModSettings
 
         private ModHelperText CreateInfoLine(ModHelperPanel parent)
         {
-            var panel = parent.AddPanel(new Info(Name, SacrificeHelperUI.InfoWidth, SacrificeHelperUI.InfoHeight), null,
+            var panel = parent.AddPanel(new Info(Name, SacrificeHelperTsm.InfoWidth, SacrificeHelperTsm.InfoHeight),
+                null,
                 RectTransform.Axis.Horizontal, 25);
-            var icon = panel.AddButton(new Info("Icon", SacrificeHelperUI.InfoHeight), Icon, new Action(() =>
+            var icon = panel.AddButton(new Info("Icon", SacrificeHelperTsm.InfoHeight), Icon, new Action(() =>
             {
                 var message = $"You are getting {current:N0} Paragon Power from {Name}.";
                 if (max > 0)
@@ -386,8 +337,8 @@ public class SacrificeHelperUtility : IModSettings
             }));
             ModifyIcon?.Invoke(icon);
             var text = panel.AddText(
-                new Info("Amount", SacrificeHelperUI.InfoWidth - SacrificeHelperUI.InfoHeight - 50,
-                    SacrificeHelperUI.InfoHeight), "", 69);
+                new Info("Amount", SacrificeHelperTsm.InfoWidth - SacrificeHelperTsm.InfoHeight - 50,
+                    SacrificeHelperTsm.InfoHeight), "", 69);
             text.Text.alignment = TextAlignmentOptions.MidlineLeft;
             return text;
         }
