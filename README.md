@@ -69,8 +69,6 @@ shop for BTD6 utilities.
 
 - Temple and Paragon Sacrifice UI from Sacrifice Helper
   - Use the full mod for sacrifice effect customization
-- VTSG being usable in Sandbox from Unlimited 5th Tiers +
-  - Use the full mod for multiple 5th tiers, VTSGs, etc
 
 If any of these other mods is used at the same time, Useful Utilities will defer to their implementations and not clash with
 them.
