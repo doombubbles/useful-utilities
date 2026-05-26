@@ -1,1 +1,3 @@
-- Minor improvements to Upgrade Queueing Paths++ support
+- Fixed some minor Copy/Paste towers interactions with Paths++
+- Added a toggleable utility "Monkey Auto Renamer" (default off) - When a named monkey is sold/destroyed, the monkey with the next highest number of pops will carry on its name.
+- Fixed some more Upgrade Queueing edge cases

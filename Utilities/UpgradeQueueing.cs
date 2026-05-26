@@ -99,6 +99,8 @@ public class UpgradeQueueing : UsefulUtility
 
     private static float delay;
 
+    private static bool processingUpgrade;
+
     public override void OnUpdate()
     {
         if (Off || InGame.instance == null || InGame.Bridge == null) return;
@@ -124,18 +126,39 @@ public class UpgradeQueueing : UsefulUtility
 
         var towerManager = Simulation.Current.towerManager;
 
-        if (!QueuedUpgrades.Any()) return;
+        if (!QueuedUpgrades.Any())
+        {
+            processingUpgrade = false;
+            return;
+        }
+
+        if (processingUpgrade) return;
 
         var queuedUpgrade = QueuedUpgrades.First();
 
         var tower = towerManager.GetTowerById(queuedUpgrade.TowerId);
+
+        if (tower == null)
+        {
+            QueuedUpgrades.Remove(queuedUpgrade);
+            OnQueueChanged();
+            return;
+        }
+
         var cost = 99999999f;
 
         if (towerManager.CanUpgradeTower(tower, queuedUpgrade.Path, queuedUpgrade.Tier, tower.PlayerOwnerId,
                 ref cost))
         {
-            QueuedUpgrades.Remove(queuedUpgrade);
-            UnityToSimulation.Current.UpgradeTower(tower.Id, queuedUpgrade.Path, 0, new Action<bool>(_ => { }));
+            processingUpgrade = true;
+            UnityToSimulation.Current.UpgradeTower(tower.Id, queuedUpgrade.Path, 0, new Action<bool>(success =>
+            {
+                if (success)
+                {
+                    QueuedUpgrades.Remove(queuedUpgrade);
+                }
+                processingUpgrade = false;
+            }));
         }
     }
 

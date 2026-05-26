@@ -10,7 +10,7 @@
         <DebugType>embedded</DebugType>
         <DefineConstants>USEFUL_UTILITIES</DefineConstants>
     </PropertyGroup>
-    
+
     <PropertyGroup Condition="'$(Configuration)' == 'ReleaseLite'">
         <TargetName>UsefulUtilities.Lite</TargetName>
         <ProjectName>UsefulUtilities.Lite</ProjectName>
@@ -19,26 +19,23 @@
     <ItemGroup Condition="'$(Configuration)' == 'Debug'">
         <PackageReference Include="NAudio" Version="2.2.1"/>
         <PackageReference Include="NAudio.WinMM" Version="2.2.1"/>
-        <PackageReference Include="NAudio.Vorbis.Latest" Version="1.5.1" />
+        <PackageReference Include="NAudio.Vorbis.Latest" Version="1.5.1"/>
     </ItemGroup>
 
-    <Import Project="..\btd6.targets" />
-    
+    <Import Project="..\btd6.targets"/>
+
     <ItemGroup Condition="'$(Configuration)' == 'ReleaseLite'">
-        <Compile Remove="Utilities/AutoNudge.cs" />
-        <Compile Remove="Utilities/BetterAutoStart.cs" />
-        <Compile Remove="Utilities/CopyPasteTowers.cs" />
-        <Compile Remove="Utilities/IndiscriminatePets.cs" />
-        <Compile Remove="Utilities/InGameHeroSwitch.cs" />
-        <Compile Remove="Utilities/SacrificeHelper.cs" />
+        <Compile Remove="Utilities/AutoNudge.cs"/>
+        <Compile Remove="Utilities/BetterAutoStart.cs"/>
+        <Compile Remove="Utilities/CopyPasteTowers.cs"/>
+        <Compile Remove="Utilities/IndiscriminatePets.cs"/>
+        <Compile Remove="Utilities/InGameHeroSwitch.cs"/>
+        <Compile Remove="Utilities/SacrificeHelper.cs"/>
     </ItemGroup>
-    
+
     <ItemGroup>
-      <Content Include=".github\workflows\build.yml" />
+        <Content Include=".github\workflows\build.yml"/>
+        <EmbeddedResource Include="Resources\wiki_links.json"/>
     </ItemGroup>
-    
-    <ItemGroup>
-      <EmbeddedResource Include="Resources\wiki_links.json" />
-    </ItemGroup>
-    
+
 </Project>

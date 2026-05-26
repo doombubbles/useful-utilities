@@ -46,6 +46,7 @@ public class CopyPasteTowersUtility
 #endif
 
     private static TowerModel? clipboard;
+    private static TowerModel? rootClipboard;
     private static double baseCost;
     private static double cost;
     private static bool nextPlaceIsPaste;
@@ -114,6 +115,7 @@ public class CopyPasteTowersUtility
         cost = CalculateCost(tower.towerModel) + ModifyClipboardCost(tower);
 
         clipboard = tower.towerModel;
+        rootClipboard = tower.rootModel.Cast<TowerModel>();
         var baseTower = InGame.instance.GetGameModel().GetTower(clipboard.baseId);
 
         baseCost = baseTower.cost + ModifyClipboardCost(tower);
@@ -140,7 +142,7 @@ public class CopyPasteTowersUtility
     private static void Paste()
     {
         var inputManager = InGame.instance.InputManager;
-        if (clipboard == null || inputManager.IsInPlacementMode) return;
+        if (clipboard == null || rootClipboard == null || inputManager.IsInPlacementMode) return;
 
 #if USEFUL_UTILITIES
         if (InGame.instance.GetCash() < cost)
@@ -171,7 +173,7 @@ public class CopyPasteTowersUtility
         if (InGame.instance.GetCash() < cost) return;
 #endif
 
-        inputManager.EnterPlacementMode(InGame.instance.GetGameModel().GetTowerWithName(clipboard.name),
+        inputManager.EnterPlacementMode(InGame.instance.GetGameModel().GetTowerWithName(rootClipboard.name),
             new Action<Vector2>(pos =>
             {
                 try
@@ -347,6 +349,7 @@ public class CopyPasteTowersUtility
         internal static void Postfix()
         {
             clipboard = null;
+            rootClipboard = null;
             foreach (var mod in ModHelper.Mods)
             {
                 mod.Call("OnClipboardCleared");

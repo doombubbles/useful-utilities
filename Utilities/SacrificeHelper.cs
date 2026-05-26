@@ -22,7 +22,7 @@ using Il2CppTMPro;
 using UnityEngine;
 using static BTD_Mod_Helper.Api.Enums.VanillaSprites;
 using Il2CppAssets.Scripts.Models.Towers.Upgrades;
-using Il2CppAssets.Scripts.Unity;
+using Il2CppAssets.Scripts.Models.TowerSets;
 
 #if USEFUL_UTILITIES
 namespace UsefulUtilities.Utilities;
@@ -31,6 +31,8 @@ namespace SacrificeHelper;
 #endif
 
 #if USEFUL_UTILITIES
+using Il2CppAssets.Scripts.Unity;
+
 public class SacrificeHelper : UsefulUtility
 #else
 using BTD_Mod_Helper.Api.Helpers;
@@ -176,8 +178,8 @@ public class SacrificeHelperUtility : IModSettings
             {
                 PivotY = 1
             }, null, RectTransform.Axis.Vertical);
-            var modHelperTexts = TowerSetType.All.ToList()
-                .Select(s => CreateInfoLine(extraSacrificeInfo, s, $"MainMenuUiAtlas[{s}Btn]"));
+            var modHelperTexts = TowerSet.AllMonkeyTowerSets.Enumerate()
+                .Select(s => CreateInfoLine(extraSacrificeInfo, s.ToString(), $"MainMenuUiAtlas[{s}Btn]"));
             sacrificeTowerSets = modHelperTexts.ToIl2CppList();
         }
 
@@ -226,15 +228,15 @@ public class SacrificeHelperUtility : IModSettings
                 var worths = Utils.GetTowerWorths(tower.tower);
                 var colors = Utils.GetColors(worths, canUpgradeToGod);
 
-                var towerSets = TowerSetType.All.ToList();
+                var towerSets = TowerSet.AllMonkeyTowerSets.Enumerate().ToList();
                 var details = sacrificeTowerSets.ToList();
                 for (var i = 0; i < details.Count; i++)
                 {
                     var towerSet = towerSets[i];
                     var detail = details[i];
 
-                    detail.SetText($"${worths[towerSet]:N0}");
-                    detail.Text.color = colors[towerSet];
+                    detail.SetText($"${worths[towerSet.ToString()]:N0}");
+                    detail.Text.color = colors[towerSet.ToString()];
                 }
             }
         }
@@ -450,12 +452,12 @@ public class SacrificeHelperUtility : IModSettings
                                                         tower.towerModel.baseId != "TempleBase-TempleBase";
 
         public static Dictionary<string, float> GetTowerWorths(Tower tower) =>
-            TowerSetType.All.ToDictionary(s => s, s => GetTowerSetWorth(s, tower));
+            TowerSet.AllMonkeyTowerSets.Enumerate().ToDictionary(s => s.ToString(), s => GetTowerSetWorth(s, tower));
 
-        private static float GetTowerSetWorth(string towerSet, Tower tower) => InGame.instance.GetTowerManager()
+        private static float GetTowerSetWorth(TowerSet towerSet, Tower tower) => InGame.instance.GetTowerManager()
             .GetTowersInRange(tower.Position, tower.towerModel.range)
             .ToList()
-            .Where(t => t.towerModel.towerSet.ToString() == towerSet && t.Id != tower.Id && IsValidTower(t))
+            .Where(t => t.towerModel.towerSet == towerSet && t.Id != tower.Id && IsValidTower(t))
             .Sum(t => t.worth);
 
         private static ParagonTower FakeParagonTower(Tower tower) => new()
@@ -472,8 +474,9 @@ public class SacrificeHelperUtility : IModSettings
         {
             var gameModel = InGame.instance != null ? InGame.Bridge.Model : Game.instance.model;
 
-            return tower.IsMutatedBy("HonoraryParagon")
-                ? gameModel.GetUpgrade("HonoraryParagon_" + tower.towerModel.name)
+            return tower.IsMutatedBy("HonoraryParagon") &&
+                   ModHelper.HasMod("HonoraryParagons", out var honoraryParagons)
+                ? honoraryParagons.Call<UpgradeModel>("GetParagonUpgrade", gameModel, tower.towerModel)
                 : gameModel.GetParagonUpgradeForTowerId(tower.towerModel.baseId);
         }
 
@@ -596,6 +599,26 @@ public class SacrificeHelperUtility : IModSettings
                 ModHelperImage.Create(new Info("DegreeIndicator", 0, -450, 250, 250), UpgradeContainerParagon);
             mainObject.AddModHelperComponent(indicator);
             indicator.AddText(new Info("DegreeText", InfoPreset.FillParent), degree.ToString(), 100f);
+        }
+    }
+}
+
+internal static class TowerSetExt
+{
+    extension(TowerSet towerSet)
+    {
+        public IEnumerable<TowerSet> Enumerate()
+        {
+            var values = Enum.GetValues<TowerSet>();
+            var i = 1;
+            while (values.Contains((TowerSet) i))
+            {
+                if (towerSet.HasFlag((TowerSet) i))
+                {
+                    yield return (TowerSet) i;
+                }
+                i *= 2;
+            }
         }
     }
 }
