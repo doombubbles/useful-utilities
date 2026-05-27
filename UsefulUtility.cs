@@ -19,7 +19,7 @@ public abstract class UsefulUtility : NamedModContent, IModSettings
 
     protected static MelonLogger.Instance MelonLogger => GetInstance<UsefulUtilitiesMod>().LoggerInstance;
 
-    public sealed override IEnumerable<ModContent> Load()
+    public override IEnumerable<ModContent> Load()
     {
         if (ModHelper.HasMod(DisableIfModPresent)) yield break;
 
@@ -32,7 +32,7 @@ public abstract class UsefulUtility : NamedModContent, IModSettings
         yield return this;
     }
 
-    public sealed override void Register()
+    public override void Register()
     {
         UsefulUtilitiesMod.UsefulUtilities[Name] = this;
 

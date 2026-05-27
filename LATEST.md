@@ -1,1 +1,2 @@
-- Removed Sandbox VTSG as it's now allowed in vanilla
+- Now using a ModLoadTask for asynchronous Jukebox folder loading
+- Added a "Normalize Volume" setting (default true) for Jukebox tracks
