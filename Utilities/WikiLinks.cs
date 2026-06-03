@@ -144,13 +144,13 @@ public class WikiLinks : ToggleableUtility
         }
     }
 
-    [HarmonyPatch(typeof(HeroUpgradeDetails), nameof(HeroUpgradeDetails.BindDetails))]
+    [HarmonyPatch(typeof(HeroUpgradeDetails), nameof(HeroUpgradeDetails.BindHeroDetails))]
     internal static class HeroUpgradeDetails_BindDetails
     {
         [HarmonyPostfix]
         private static void Postfix(HeroUpgradeDetails __instance)
         {
-            Setup(__instance.heroName, () => __instance.SelectedHeroId);
+            Setup(__instance.heroName, () => __instance.DisplayedHeroId);
         }
     }
 

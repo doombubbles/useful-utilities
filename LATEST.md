@@ -1,2 +1,1 @@
-- Now using a ModLoadTask for asynchronous Jukebox folder loading
-- Added a "Normalize Volume" setting (default true) for Jukebox tracks
+- Updated for BTD6 v55
