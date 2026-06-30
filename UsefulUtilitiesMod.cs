@@ -13,6 +13,7 @@ using UsefulUtilities.Utilities.InGameCharts;
 
 [assembly: MelonInfo(typeof(UsefulUtilitiesMod), ModHelperData.Name, ModHelperData.Version, ModHelperData.RepoOwner)]
 [assembly: MelonGame("Ninja Kiwi", "BloonsTD6")]
+[assembly: MelonGame("Ninja Kiwi", "BloonsTD6-Epic")]
 [assembly: HarmonyDontPatchAll]
 [assembly: MelonOptionalDependencies("NAudio", "PathsPlusPlus")]
 
