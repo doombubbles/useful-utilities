@@ -24,7 +24,7 @@ public class BarChart(IntPtr ptr) : ModHelperScrollPanel(ptr)
 
     public static BarChart Create(Info info) => Create<BarChart>(info);
 
-    public static T Create<T>(Info info) where T : BarChart
+    public static new T Create<T>(Info info) where T : BarChart
     {
         var barChart = ModHelperScrollPanel.Create<T>(info, RectTransform.Axis.Vertical, null, 2, 1);
 
