@@ -45,7 +45,10 @@ public class SandboxRoundEnd : ToggleableUtility
             if (!__instance.sandbox) return true;
 
             __instance.DistributeXp(round);
-            __instance.factory.GetUncast<Tower>().ForEach(tower => tower.OnRoundComplete(round));
+            foreach (var tower in __instance.factory.GetUncast<Tower>())
+            {
+                tower.OnRoundComplete(round);
+            }
             __instance.OnRoundEndProjectiles();
 
             BridgeMessaging<BridgeMessagingDelegates.OnEarlyRoundEnd>.Trigger?.Invoke(round);

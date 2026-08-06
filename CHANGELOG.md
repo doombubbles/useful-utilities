@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Updated for BTD6 v56
 - Upgrade Queueing can no longer purchase upgrades the player hasn't unlocked with XP yet
 - Fixed Upgrade Queueing silently ignoring the click when Shift upgrading a tower with an upgrade that can't be bought
 

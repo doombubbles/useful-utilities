@@ -48,7 +48,7 @@ public class UnFastForwardOnDanger : ToggleableUtility
             if (cooldown > 0) return;
             cooldown = 0;
 
-            __instance.factory.GetUncast<Bloon>().ForEach(bloon =>
+            foreach (var bloon in __instance.factory.GetUncast<Bloon>())
             {
                 if (!bloon.bloonModel.isBoss &&
                     bloon.PercThroughMap() >= TrackThreshold / 100f &&
@@ -57,7 +57,7 @@ public class UnFastForwardOnDanger : ToggleableUtility
                     TimeManager.FastForwardActive = false;
                     cooldown = 180;
                 }
-            });
+            }
         }
     }
 }

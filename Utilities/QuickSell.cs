@@ -35,7 +35,7 @@ public class QuickSell : ToggleableUtility
 
             if (!InGame.instance.hotkeys.sell.isPressed || !GetInstance<QuickSell>().Enabled) return true;
 
-            InGame.instance.SellTower(tower);
+            InGame.instance.SellTower(tower.owner, tower);
             return false;
         }
     }

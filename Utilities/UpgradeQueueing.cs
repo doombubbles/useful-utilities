@@ -151,14 +151,15 @@ public class UpgradeQueueing : UsefulUtility
                 ref cost))
         {
             processingUpgrade = true;
-            UnityToSimulation.Current.UpgradeTower(tower.Id, queuedUpgrade.Path, 0, new Action<bool>(success =>
-            {
-                if (success)
+            UnityToSimulation.Current.UpgradeTower(tower.PlayerOwnerId, tower.Id, queuedUpgrade.Path, 0,
+                new Action<bool>(success =>
                 {
-                    QueuedUpgrades.Remove(queuedUpgrade);
-                }
-                processingUpgrade = false;
-            }));
+                    if (success)
+                    {
+                        QueuedUpgrades.Remove(queuedUpgrade);
+                    }
+                    processingUpgrade = false;
+                }));
         }
     }
 

@@ -125,8 +125,8 @@ public class AutoNudgeUtility
         var bridge = InGame.instance.bridge;
         var cursorWorld = InGame.instance.GetWorldFromPointer(realCursorPos);
 
-        return bridge.CanPlaceTowerAt(cursorWorld, inputManager.placementModel, bridge.MyPlayerNumber,
-            inputManager.placementEntityId);
+        return bridge.CanPlaceTowerAt(cursorWorld, inputManager.placementModel,
+            inputManager.PlayerContext.playerIndex, inputManager.placementEntityId);
     }
 
     private static void NudgeDirection(Vector2 dir)

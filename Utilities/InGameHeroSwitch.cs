@@ -60,10 +60,13 @@ public class InGameHeroSwitchUtility
         }
     }
 
+    // v56 removed UnityToSimulation.MyPlayerNumber, player numbers now come from the PlayerContext
+    private static int MyPlayerNumber => InGame.instance.PlayerOne.playerIndex;
+
     private static string CurrentHero
     {
-        get => InGame.Bridge.players[InGame.Bridge.MyPlayerNumber].hero;
-        set => InGame.Bridge.players[InGame.Bridge.MyPlayerNumber].hero = value;
+        get => InGame.Bridge.players[MyPlayerNumber].hero;
+        set => InGame.Bridge.players[MyPlayerNumber].hero = value;
     }
 
     private static void ChangeHero(int delta)
