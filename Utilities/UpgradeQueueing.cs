@@ -236,11 +236,12 @@ public class UpgradeQueueing : UsefulUtility
 
             if (upgrade == null) return !shift;
 
-            if (!__instance.Bridge.IsUpgradeLocked(tower.Id, index, tier) && InGame.instance.Player.HasUpgrade(upgrade))
-            {
-                EnqueueUpgrade(new QueuedUpgrade(tower.Id, index, tier, upgrade));
-                delay = .1f;
-            }
+            // Let the base game handle upgrades that can't be bought, so that it still gives its own feedback
+            if (__instance.Bridge.IsUpgradeLocked(tower.Id, index, tier) ||
+                !InGame.instance.Player.HasUpgrade(upgrade)) return true;
+
+            EnqueueUpgrade(new QueuedUpgrade(tower.Id, index, tier, upgrade));
+            delay = .1f;
 
             return !shift;
         }
