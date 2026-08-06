@@ -5,6 +5,7 @@ using Il2CppAssets.Scripts.Simulation;
 using Il2CppAssets.Scripts.Simulation.Towers;
 using Il2CppAssets.Scripts.Simulation.Track;
 using Il2CppAssets.Scripts.Utils.Messaging;
+using Il2CppSystem.IO;
 namespace UsefulUtilities.Utilities;
 
 public class SandboxRoundEnd : ToggleableUtility
@@ -45,7 +46,7 @@ public class SandboxRoundEnd : ToggleableUtility
             if (!__instance.sandbox) return true;
 
             __instance.DistributeXp(round);
-            __instance.factory.GetUncast<Tower>().ForEach(tower => tower.OnRoundComplete(round));
+            __instance.factory.Get<Tower>().ForEach(tower => tower.OnRoundComplete(round));
             __instance.OnRoundEndProjectiles();
 
             BridgeMessaging<BridgeMessagingDelegates.OnEarlyRoundEnd>.Trigger?.Invoke(round);

@@ -62,8 +62,8 @@ public class InGameHeroSwitchUtility
 
     private static string CurrentHero
     {
-        get => InGame.Bridge.players[InGame.Bridge.MyPlayerNumber].hero;
-        set => InGame.Bridge.players[InGame.Bridge.MyPlayerNumber].hero = value;
+        get => InGame.Bridge.players[InGame.Bridge.GetInputId()].hero;
+        set => InGame.Bridge.players[InGame.Bridge.GetInputId()].hero = value;
     }
 
     private static void ChangeHero(int delta)

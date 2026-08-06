@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Fixed for BTD6 v56
 - Upgrade Queueing can no longer purchase upgrades the player hasn't unlocked with XP yet
 
 ## [1.4.7] - 2026-06-03

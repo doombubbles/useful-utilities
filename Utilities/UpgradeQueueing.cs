@@ -151,7 +151,8 @@ public class UpgradeQueueing : UsefulUtility
                 ref cost))
         {
             processingUpgrade = true;
-            UnityToSimulation.Current.UpgradeTower(tower.Id, queuedUpgrade.Path, 0, new Action<bool>(success =>
+            UnityToSimulation.Current.UpgradeTower(UnityToSimulation.Current.GetInputId(), tower.Id,
+                queuedUpgrade.Path, 0, new Action<bool>(success =>
             {
                 if (success)
                 {

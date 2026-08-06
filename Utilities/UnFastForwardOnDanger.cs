@@ -3,6 +3,7 @@ using BTD_Mod_Helper.Api.ModOptions;
 using HarmonyLib;
 using Il2CppAssets.Scripts.Simulation;
 using Il2CppAssets.Scripts.Simulation.Bloons;
+using Il2CppSystem.IO;
 using UnityEngine;
 namespace UsefulUtilities.Utilities;
 
@@ -48,7 +49,7 @@ public class UnFastForwardOnDanger : ToggleableUtility
             if (cooldown > 0) return;
             cooldown = 0;
 
-            __instance.factory.GetUncast<Bloon>().ForEach(bloon =>
+            __instance.factory.Get<Bloon>().ForEach(bloon =>
             {
                 if (!bloon.bloonModel.isBoss &&
                     bloon.PercThroughMap() >= TrackThreshold / 100f &&
