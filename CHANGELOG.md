@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.9] - 2026-08-09
+
+- Fixed potential enumerator crashes for some utilities
+
 ## [1.4.8] - 2026-08-06
 
 - Fixed for BTD6 v56
@@ -272,7 +276,8 @@ be removed as it can still be useful for finding a very tiny mearby placement sp
 
 - Initial Release
 
-[unreleased]: https://github.com/doombubbles/UsefulUtilities/compare/1.4.8...HEAD
+[unreleased]: https://github.com/doombubbles/UsefulUtilities/compare/1.4.9...HEAD
+[1.4.9]: https://github.com/doombubbles/UsefulUtilities/compare/1.4.8...1.4.9
 [1.4.8]: https://github.com/doombubbles/UsefulUtilities/compare/1.4.7...1.4.8
 [1.4.7]: https://github.com/doombubbles/UsefulUtilities/compare/1.4.6...1.4.7
 [1.4.6]: https://github.com/doombubbles/UsefulUtilities/compare/1.4.5...1.4.6
